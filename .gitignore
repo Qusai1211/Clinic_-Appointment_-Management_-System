@@ -1,0 +1,15 @@
+# Visual Studio and .NET
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Temporary inspection files
+temp_inspection/
+pdf_extracted.txt
+
+# Angular
+Frontend_Clinic/node_modules/
+Frontend_Clinic/.angular/
+Frontend_Clinic/dist/
