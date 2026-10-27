@@ -1,0 +1,180 @@
+<div class="page-container py-4">
+  <div class="container">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div>
+        <span class="badge-pill">Oracle Live Database Telemetry</span>
+        <h1 class="dash-title">Administrator Dashboard</h1>
+        <p class="dash-desc">
+          Live clinic operations, patient appointments, and specialty performance metrics.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" (click)="loadDashboardData()">
+          🔄 Refresh Stats
+        </button>
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Querying Vw_AdminDashboardStats and Oracle database views...</p>
+      </div>
+    } @else {
+      <!-- 6 Metrics Counters Grid -->
+      <div class="stats-grid">
+        <!-- Total Doctors -->
+        <div class="stat-card card">
+          <div class="stat-icon-wrapper blue">
+            <span>👨‍⚕️</span>
+          </div>
+          <div class="stat-details">
+            <span class="stat-lbl">Total Doctors</span>
+            <span class="stat-value">{{ stats.totalDoctors }}</span>
+          </div>
+          <a routerLink="/admin/doctors" class="stat-link">Manage Doctors →</a>
+        </div>
+
+        <!-- Total Patients -->
+        <div class="stat-card card">
+          <div class="stat-icon-wrapper teal">
+            <span>👥</span>
+          </div>
+          <div class="stat-details">
+            <span class="stat-lbl">Total Patients</span>
+            <span class="stat-value">{{ stats.totalPatients }}</span>
+          </div>
+          <a routerLink="/admin/patients" class="stat-link">Manage Patients →</a>
+        </div>
+
+        <!-- Total Appointments -->
+        <div class="stat-card card">
+          <div class="stat-icon-wrapper indigo">
+            <span>📅</span>
+          </div>
+          <div class="stat-details">
+            <span class="stat-lbl">Total Appointments</span>
+            <span class="stat-value">{{ stats.totalAppointments }}</span>
+          </div>
+          <a routerLink="/admin/appointments" class="stat-link">All Appointments →</a>
+        </div>
+
+        <!-- Scheduled Appointments -->
+        <div class="stat-card card">
+          <div class="stat-icon-wrapper green">
+            <span>⏳</span>
+          </div>
+          <div class="stat-details">
+            <span class="stat-lbl">Scheduled / Confirmed</span>
+            <span class="stat-value text-success">{{ stats.scheduledAppointments }}</span>
+          </div>
+          <a routerLink="/admin/appointments" class="stat-link">View Upcoming →</a>
+        </div>
+
+        <!-- Completed Appointments -->
+        <div class="stat-card card">
+          <div class="stat-icon-wrapper purple">
+            <span>✅</span>
+          </div>
+          <div class="stat-details">
+            <span class="stat-lbl">Completed</span>
+            <span class="stat-value text-info">{{ stats.completedAppointments }}</span>
+          </div>
+          <a routerLink="/admin/appointments" class="stat-link">View Completed →</a>
+        </div>
+
+        <!-- Cancelled Appointments -->
+        <div class="stat-card card">
+          <div class="stat-icon-wrapper red">
+            <span>❌</span>
+          </div>
+          <div class="stat-details">
+            <span class="stat-lbl">Cancelled</span>
+            <span class="stat-value text-danger">{{ stats.cancelledAppointments }}</span>
+          </div>
+          <a routerLink="/admin/appointments" class="stat-link">View Log →</a>
+        </div>
+      </div>
+
+      <!-- Specialty Distribution Chart Section -->
+      <div class="chart-section card my-4">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Appointments by Medical Specialty</h3>
+            <p class="chart-subtitle">
+              Queried directly from Oracle View: <code>Vw_AppointmentsBySpecialty</code>
+            </p>
+          </div>
+          <span class="badge badge-info">{{ chartData.length }} Specialties Analyzed</span>
+        </div>
+
+        @if (chartData.length === 0) {
+          <p class="no-chart-data">No appointment data available for chart distribution.</p>
+        } @else {
+          <!-- Responsive SVG / Bar Chart Representation -->
+          <div class="bars-container">
+            @for (item of chartData; track item.specialtyId) {
+              <div class="bar-column">
+                <div class="bar-track">
+                  <div 
+                    class="bar-fill" 
+                    [style.height.%]="getBarHeightPercentage(item.appointmentCount)"
+                    [title]="item.specialtyName + ': ' + item.appointmentCount + ' appointments'"
+                  >
+                    <span class="bar-count-badge">{{ item.appointmentCount }}</span>
+                  </div>
+                </div>
+                <span class="bar-label" [title]="item.specialtyName">{{ item.specialtyName }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Quick Action Navigation Hub -->
+      <div class="management-hub">
+        <h3 class="hub-title">Administrative Management Modules</h3>
+        
+        <div class="hub-grid">
+          <a routerLink="/admin/doctors" class="hub-card card">
+            <div class="hub-icon">👨‍⚕️</div>
+            <div class="hub-text">
+              <h4>Doctor Records</h4>
+              <p>Add, edit, view doctors, consultation fees, and working hours.</p>
+            </div>
+            <span class="hub-arrow">→</span>
+          </a>
+
+          <a routerLink="/admin/specialties" class="hub-card card">
+            <div class="hub-icon">🏥</div>
+            <div class="hub-text">
+              <h4>Medical Specialties</h4>
+              <p>Create and edit clinical departments and specialty classifications.</p>
+            </div>
+            <span class="hub-arrow">→</span>
+          </a>
+
+          <a routerLink="/admin/patients" class="hub-card card">
+            <div class="hub-icon">👤</div>
+            <div class="hub-text">
+              <h4>Patient Directory</h4>
+              <p>Access registered patient profiles, contact details, and dates of birth.</p>
+            </div>
+            <span class="hub-arrow">→</span>
+          </a>
+
+          <a routerLink="/admin/appointments" class="hub-card card">
+            <div class="hub-icon">📋</div>
+            <div class="hub-text">
+              <h4>Appointment Manager</h4>
+              <p>View bookings, cancel appointments, and update status in Oracle.</p>
+            </div>
+            <span class="hub-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+</div>

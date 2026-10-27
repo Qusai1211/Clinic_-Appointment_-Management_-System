@@ -1,0 +1,133 @@
+<div class="page-container py-4">
+  <div class="container">
+    <div class="mgmt-header">
+      <div>
+        <nav class="breadcrumb-sub">
+          <a routerLink="/admin/dashboard">Admin Dashboard</a>
+          <span class="sep">/</span>
+          <span>Patient Registry</span>
+        </nav>
+        <h1 class="page-title">Registered Patients Directory</h1>
+        <p class="page-desc">Query and inspect patient profiles, verified contact details, and dates of birth in Oracle.</p>
+      </div>
+
+      <a routerLink="/register-patient" class="btn btn-primary">
+        + Register New Patient
+      </a>
+    </div>
+
+    <!-- Search Toolbar -->
+    <div class="toolbar card">
+      <div class="search-box">
+        <span class="icon">🔍</span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (ngModelChange)="loadPatients()" 
+          placeholder="Search by patient name, email, or telephone number..." 
+          class="form-control"
+        />
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Loading patient records from Oracle Database...</p>
+      </div>
+    } @else if (patients.length === 0) {
+      <div class="card empty-card text-center">
+        <h3>No Patients Found</h3>
+        <p>No patient records match the search query.</p>
+      </div>
+    } @else {
+      <div class="table-responsive card p-0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Patient ID</th>
+              <th>Full Legal Name</th>
+              <th>Phone Number</th>
+              <th>Email Address</th>
+              <th>Date of Birth</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of patients; track p.patientId) {
+              <tr>
+                <td><strong>#{{ p.patientId }}</strong></td>
+                <td>
+                  <strong class="pat-name">{{ p.fullName }}</strong>
+                </td>
+                <td>
+                  <span class="pat-phone">{{ p.phoneNumber }}</span>
+                </td>
+                <td>
+                  <span class="pat-email">{{ p.email }}</span>
+                </td>
+                <td>
+                  <span class="pat-dob">{{ p.dateOfBirth | date:'mediumDate' }}</span>
+                </td>
+                <td>
+                  <div class="actions-group">
+                    <button class="btn btn-outline btn-sm" (click)="viewPatient(p)">
+                      🔍 View Profile
+                    </button>
+                    <a [routerLink]="['/book']" [queryParams]="{ patientId: p.patientId }" class="btn btn-primary btn-sm">
+                      + Book
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Patient Detail Modal -->
+@if (selectedPatient) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Patient Profile: #{{ selectedPatient.patientId }}</h3>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="profile-info-grid">
+          <div class="info-row">
+            <span class="lbl">Full Legal Name:</span>
+            <strong class="val">{{ selectedPatient.fullName }}</strong>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Phone Number:</span>
+            <span class="val">{{ selectedPatient.phoneNumber }}</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Email Address:</span>
+            <span class="val">{{ selectedPatient.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Date of Birth:</span>
+            <span class="val">{{ selectedPatient.dateOfBirth | date:'longDate' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Database Status:</span>
+            <span class="badge badge-scheduled">Verified in Oracle</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a [routerLink]="['/book']" [queryParams]="{ patientId: selectedPatient.patientId }" class="btn btn-primary" (click)="closeModal()">
+          Book Appointment for Patient →
+        </a>
+        <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}

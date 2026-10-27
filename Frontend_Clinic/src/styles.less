@@ -1,1 +1,318 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   Al-Amal Clinic Global Design System
+   ========================================================================== */
+
+:root {
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-light: #e0f2fe;
+  --secondary: #0f766e;
+  --dark: #0f172a;
+  --dark-light: #1e293b;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --success: #16a34a;
+  --success-light: #dcfce7;
+  --warning: #d97706;
+  --warning-light: #fef3c7;
+  --danger: #dc2626;
+  --danger-light: #fee2e2;
+  --info: #2563eb;
+  --info-light: #dbeafe;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--gray-800);
+  background-color: var(--gray-50);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--gray-900);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+p {
+  color: var(--gray-600);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  line-height: 1;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  }
+}
+
+.btn-secondary {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+  border-color: var(--gray-300);
+
+  &:hover:not(:disabled) {
+    background-color: var(--gray-200);
+    color: var(--gray-900);
+  }
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background-color: #b91c1c;
+  }
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--primary);
+  color: var(--primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--primary-light);
+  }
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 1.25rem;
+
+  .form-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.4rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    background-color: #ffffff;
+    color: var(--gray-900);
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    &::placeholder {
+      color: var(--gray-400);
+    }
+  }
+
+  .form-error {
+    font-size: 0.8rem;
+    color: var(--danger);
+    margin-top: 0.35rem;
+  }
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 20px;
+  text-transform: capitalize;
+
+  &.badge-scheduled, &.badge-confirmed {
+    background-color: var(--success-light);
+    color: var(--success);
+  }
+
+  &.badge-completed {
+    background-color: var(--info-light);
+    color: var(--info);
+  }
+
+  &.badge-cancelled {
+    background-color: var(--danger-light);
+    color: var(--danger);
+  }
+
+  &.badge-pending {
+    background-color: var(--warning-light);
+    color: var(--warning);
+  }
+}
+
+/* Cards */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.92rem;
+
+  th {
+    background-color: var(--gray-100);
+    color: var(--gray-700);
+    font-weight: 600;
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--gray-200);
+  }
+
+  td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    color: var(--gray-700);
+  }
+
+  tr:hover td {
+    background-color: var(--gray-50);
+  }
+}
+
+/* Toasts */
+.toast-container {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast {
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-lg);
+  animation: slideIn 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 280px;
+
+  &.toast-success { background-color: var(--success); }
+  &.toast-error { background-color: var(--danger); }
+  &.toast-warning { background-color: var(--warning); }
+  &.toast-info { background-color: var(--info); }
+
+  .toast-close {
+    background: none;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-left: 0.75rem;
+  }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  padding: 2rem;
+}

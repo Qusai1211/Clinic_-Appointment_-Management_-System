@@ -1,0 +1,192 @@
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container hero-container">
+    <div class="hero-content">
+      <span class="hero-pill">✓ Certified Medical Excellence</span>
+      <h1 class="hero-title">Your Health, Our Highest Priority</h1>
+      <p class="hero-desc">
+        Welcome to Al-Amal Medical Clinic. Schedule appointments with leading board-certified physicians, specialists, and surgeons with instant online confirmation.
+      </p>
+
+      <!-- Search Bar -->
+      <form class="hero-search-card" (ngSubmit)="onSearch()">
+        <div class="search-field">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            name="searchQuery"
+            placeholder="Search doctor by name or specialty..."
+            class="search-input"
+          />
+        </div>
+        <div class="search-field select-field">
+          <span class="search-icon">🏥</span>
+          <select [(ngModel)]="selectedSpecialtyId" name="selectedSpecialtyId" class="search-select">
+            <option [value]="0">All Specialties</option>
+            @for (s of specialties; track s.specialtyId) {
+              <option [value]="s.specialtyId">{{ s.specialtyName }}</option>
+            }
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-search">
+          Find Doctors
+        </button>
+      </form>
+
+      <!-- Quick Action Buttons -->
+      <div class="hero-actions">
+        <a routerLink="/book" class="btn btn-primary">Book an Appointment</a>
+        <a routerLink="/doctors" class="btn btn-secondary">Explore Doctors</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="stat-bubble bubble-1">
+        <span class="bubble-num">9+</span>
+        <span class="bubble-lbl">Specialist Doctors</span>
+      </div>
+      <div class="stat-bubble bubble-2">
+        <span class="bubble-num">100%</span>
+        <span class="bubble-lbl">Verified Consultations</span>
+      </div>
+      <div class="stat-bubble bubble-3">
+        <span class="bubble-num">24/7</span>
+        <span class="bubble-lbl">Emergency Response</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Specialties Section -->
+<section class="section specialties-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Clinical Departments</span>
+      <h2 class="section-title">Medical Specialties</h2>
+      <p class="section-subtitle">
+        Click any specialty to view qualified doctors and available consultation schedules.
+      </p>
+    </div>
+
+    <div class="specialties-grid">
+      @for (spec of specialties; track spec.specialtyId) {
+        <div class="specialty-card" (click)="goToSpecialty(spec.specialtyId)">
+          <div class="specialty-icon-wrapper">
+            <span class="specialty-symbol">🩺</span>
+          </div>
+          <h3 class="specialty-name">{{ spec.specialtyName }}</h3>
+          <p class="specialty-desc">{{ spec.description || 'Specialized clinical examinations and patient care.' }}</p>
+          <div class="specialty-meta">
+            <span class="doc-count">{{ spec.doctorCount || 0 }} Doctors Available</span>
+            <span class="view-link">View Doctors →</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Featured Doctors Section -->
+<section class="section featured-doctors-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Meet Our Top Specialists</span>
+      <h2 class="section-title">Featured Doctors</h2>
+      <p class="section-subtitle">
+        Leading board-certified specialists ready to deliver the care you need.
+      </p>
+    </div>
+
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading featured doctors from database...</p>
+      </div>
+    } @else {
+      <div class="doctors-grid">
+        @for (doctor of featuredDoctors; track doctor.doctorId) {
+          <div class="doctor-card">
+            <div class="doctor-card-header">
+              <div class="doctor-avatar">
+                <span class="avatar-initials">{{ doctor.fullName.charAt(4) || 'D' }}</span>
+              </div>
+              <span class="specialty-pill">{{ doctor.specialtyName || 'Specialist' }}</span>
+            </div>
+            
+            <div class="doctor-card-body">
+              <h3 class="doctor-name">{{ doctor.fullName }}</h3>
+              <p class="doctor-qualifications">{{ doctor.qualifications || 'Qualified Medical Specialist' }}</p>
+              
+              <div class="doctor-fee-box">
+                <span class="fee-lbl">Consultation Fee</span>
+                <span class="fee-amt">${{ doctor.consultationFee | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="doctor-card-footer">
+              <a [routerLink]="['/doctors', doctor.doctorId]" class="btn btn-outline btn-sm w-100">
+                View Details & Slots
+              </a>
+              <a [routerLink]="['/book']" [queryParams]="{ doctorId: doctor.doctorId }" class="btn btn-primary btn-sm w-100">
+                Book Now
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="center-cta">
+        <a routerLink="/doctors" class="btn btn-secondary">
+          View All Doctors & Schedule →
+        </a>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Clinic Information & Working Hours Section -->
+<section class="section clinic-info-section">
+  <div class="container">
+    <div class="info-banner-card">
+      <div class="info-content">
+        <span class="section-tag">Reliable & Accessible</span>
+        <h2 class="banner-title">Modern Healthcare Infrastructure</h2>
+        <p class="banner-desc">
+          Al-Amal Clinic integrates state-of-the-art diagnostic facilities with seamless digital records and appointment tracking powered by Oracle Enterprise Database.
+        </p>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-icon">🕒</span>
+            <div>
+              <h4>Working Hours</h4>
+              <p>Sat – Wed: 8:00 AM – 8:00 PM<br>Thu: 8:00 AM – 5:00 PM</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">🚨</span>
+            <div>
+              <h4>24/7 Emergency</h4>
+              <p>Emergency medical triage available 24 hours a day, 7 days a week.</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">📍</span>
+            <div>
+              <h4>Prime Location</h4>
+              <p>Zahran St, Medical City, Amman with dedicated patient parking.</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">🔒</span>
+            <div>
+              <h4>Confidential & Safe</h4>
+              <p>HIPAA compliant, secure patient records and appointment verification.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

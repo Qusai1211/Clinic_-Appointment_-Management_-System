@@ -1,0 +1,247 @@
+<div class="page-container py-4">
+  <div class="container">
+    <div class="booking-header">
+      <span class="header-pill">Instant Online Scheduling</span>
+      <h1 class="header-title">Book a Medical Appointment</h1>
+      <p class="header-desc">
+        Complete the form below to lock your consultation slot with real-time Oracle database verification.
+      </p>
+    </div>
+
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Loading clinic booking configuration...</p>
+      </div>
+    } @else {
+      <div class="booking-layout">
+        <!-- Left: Booking Form -->
+        <div class="form-column">
+          <form (ngSubmit)="onSubmit()" class="booking-form card">
+            @if (errorMessage) {
+              <div class="alert-error">
+                <span>⚠️ {{ errorMessage }}</span>
+              </div>
+            }
+
+            <!-- Step 1: Select Doctor -->
+            <div class="form-section">
+              <div class="step-badge">1</div>
+              <h3 class="section-title">Select Doctor & Department</h3>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="doctorSelect">Medical Practitioner *</label>
+              <select 
+                id="doctorSelect"
+                [(ngModel)]="selectedDoctorId" 
+                name="selectedDoctorId" 
+                (ngModelChange)="onDoctorSelect()"
+                class="form-control"
+                required
+              >
+                <option [value]="0">-- Choose a Doctor --</option>
+                @for (doc of doctors; track doc.doctorId) {
+                  <option [value]="doc.doctorId">
+                    {{ doc.fullName }} ({{ doc.specialtyName }}) - Fee: ${{ doc.consultationFee }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <!-- Step 2: Available Slots -->
+            @if (selectedDoctorId > 0) {
+              <div class="form-section">
+                <div class="step-badge">2</div>
+                <h3 class="section-title">Choose Appointment Slot</h3>
+              </div>
+
+              @if (availableSlots.length === 0) {
+                <div class="no-slots-alert">
+                  <span>ℹ️ No available consultation slots found for this doctor.</span>
+                </div>
+              } @else {
+                <div class="slots-selector-grid">
+                  @for (slot of availableSlots; track slot.slotId) {
+                    <div 
+                      class="slot-btn" 
+                      [class.active]="selectedSlotId === slot.slotId"
+                      (click)="onSlotSelect(slot)"
+                    >
+                      <span class="slot-date-text">{{ slot.slotDate | date:'mediumDate' }}</span>
+                      <strong class="slot-time-text">{{ slot.slotTime }}</strong>
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            <!-- Step 3: Patient Information -->
+            <div class="form-section">
+              <div class="step-badge">3</div>
+              <h3 class="section-title">Patient Information</h3>
+            </div>
+
+            <!-- Patient Mode Switch -->
+            <div class="mode-tabs">
+              <button 
+                type="button" 
+                class="mode-tab" 
+                [class.active]="patientMode === 'new'"
+                (click)="patientMode = 'new'"
+              >
+                New Patient
+              </button>
+              <button 
+                type="button" 
+                class="mode-tab" 
+                [class.active]="patientMode === 'existing'"
+                (click)="patientMode = 'existing'"
+              >
+                Existing Patient Record
+              </button>
+            </div>
+
+            @if (patientMode === 'new') {
+              <div class="patient-fields">
+                <div class="form-group">
+                  <label class="form-label" for="patName">Full Legal Name *</label>
+                  <input 
+                    type="text" 
+                    id="patName"
+                    [(ngModel)]="patientName" 
+                    name="patientName" 
+                    class="form-control" 
+                    placeholder="e.g. John Doe"
+                    required
+                  />
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col">
+                    <label class="form-label" for="patPhone">Phone Number *</label>
+                    <input 
+                      type="tel" 
+                      id="patPhone"
+                      [(ngModel)]="patientPhone" 
+                      name="patientPhone" 
+                      class="form-control" 
+                      placeholder="+962 7 9000 0000"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group col">
+                    <label class="form-label" for="patEmail">Email Address *</label>
+                    <input 
+                      type="email" 
+                      id="patEmail"
+                      [(ngModel)]="patientEmail" 
+                      name="patientEmail" 
+                      class="form-control" 
+                      placeholder="patient@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="patDob">Date of Birth (Optional)</label>
+                  <input 
+                    type="date" 
+                    id="patDob"
+                    [(ngModel)]="patientDateOfBirth" 
+                    name="patientDateOfBirth" 
+                    class="form-control"
+                  />
+                </div>
+              </div>
+            } @else {
+              <!-- Existing Patient Select -->
+              <div class="patient-fields">
+                <div class="form-group">
+                  <label class="form-label" for="patientSelect">Select Existing Patient *</label>
+                  <select 
+                    id="patientSelect"
+                    [(ngModel)]="selectedPatientId" 
+                    name="selectedPatientId" 
+                    class="form-control"
+                    required
+                  >
+                    <option [value]="0">-- Choose Registered Patient --</option>
+                    @for (p of patients; track p.patientId) {
+                      <option [value]="p.patientId">
+                        {{ p.fullName }} ({{ p.phoneNumber }} - {{ p.email }})
+                      </option>
+                    }
+                  </select>
+                </div>
+                <p class="helper-text">
+                  Don't see your name? <a routerLink="/register-patient">Register a new patient account</a>.
+                </p>
+              </div>
+            }
+
+            <div class="submit-box">
+              <button 
+                type="submit" 
+                class="btn btn-primary btn-book" 
+                [disabled]="isSubmitting || !selectedDoctorId || !selectedSlot"
+              >
+                {{ isSubmitting ? 'Verifying & Persisting Appointment...' : 'Confirm & Book Appointment' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Appointment Summary Card -->
+        <div class="summary-column">
+          <div class="card summary-card sticky-card">
+            <h3 class="summary-title">Appointment Summary</h3>
+
+            <div class="summary-doctor-block">
+              @if (selectedDoctor) {
+                <div class="doc-avatar">
+                  <span>{{ selectedDoctor.fullName.charAt(4) || 'D' }}</span>
+                </div>
+                <div>
+                  <h4 class="doc-name">{{ selectedDoctor.fullName }}</h4>
+                  <span class="doc-spec">{{ selectedDoctor.specialtyName }}</span>
+                </div>
+              } @else {
+                <p class="placeholder-text">Please select a doctor to review credentials and fee.</p>
+              }
+            </div>
+
+            <div class="summary-breakdown">
+              <div class="breakdown-row">
+                <span class="label">Date:</span>
+                <span class="value">{{ (selectedSlot?.slotDate | date:'mediumDate') || 'Not selected' }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="label">Time:</span>
+                <span class="value">{{ selectedSlot?.slotTime || 'Not selected' }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="label">Department:</span>
+                <span class="value">{{ selectedDoctor?.specialtyName || '—' }}</span>
+              </div>
+              <div class="breakdown-row total-row">
+                <span class="label">Consultation Fee:</span>
+                <span class="value fee">${{ (selectedDoctor?.consultationFee || 0) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="guarantee-box">
+              <span class="shield-icon">🛡️</span>
+              <div>
+                <strong>Guaranteed Slot Reservation</strong>
+                <p>Database row locking guarantees no double booking for the selected appointment slot.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,129 @@
+<div class="page-container">
+  <div class="container py-4">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav">
+      <a routerLink="/">Home</a>
+      <span class="sep">/</span>
+      <a routerLink="/doctors">Doctors</a>
+      <span class="sep">/</span>
+      <span class="current">{{ doctor?.fullName || 'Doctor Profile' }}</span>
+    </nav>
+
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Loading practitioner profile and consultation schedule...</p>
+      </div>
+    } @else if (errorMessage || !doctor) {
+      <div class="card error-card">
+        <h3>Practitioner Not Found</h3>
+        <p>{{ errorMessage || 'The requested doctor record does not exist in the database.' }}</p>
+        <a routerLink="/doctors" class="btn btn-primary">Return to Doctors List</a>
+      </div>
+    } @else {
+      <!-- Doctor Profile Grid -->
+      <div class="profile-layout">
+        <!-- Left: Doctor Info Card -->
+        <div class="doctor-profile-card card">
+          <div class="profile-header">
+            <div class="avatar-large">
+              <span>{{ doctor.fullName.charAt(4) || 'D' }}</span>
+            </div>
+            <div class="header-details">
+              <span class="specialty-badge">{{ doctor.specialtyName || 'Specialist' }}</span>
+              <h1 class="doctor-name">{{ doctor.fullName }}</h1>
+              <p class="qualifications">{{ doctor.qualifications }}</p>
+            </div>
+          </div>
+
+          <div class="fee-card">
+            <div class="fee-info">
+              <span class="fee-title">Consultation Fee</span>
+              <span class="fee-note">Per clinical consultation visit</span>
+            </div>
+            <div class="fee-amount">
+              ${{ doctor.consultationFee | number:'1.2-2' }}
+            </div>
+          </div>
+
+          <!-- Working Days & Hours -->
+          <div class="working-hours-section">
+            <h3 class="section-title">📅 Weekly Working Schedule</h3>
+            @if (workingHours.length === 0) {
+              <p class="no-data">No specific working days listed. Available by appointment.</p>
+            } @else {
+              <div class="hours-table">
+                @for (h of workingHours; track h.workingHoursId) {
+                  <div class="hour-row">
+                    <span class="day-name">{{ h.dayOfWeek }}</span>
+                    <span class="time-range">{{ h.startTime }} – {{ h.endTime }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Right: Available Appointment Slots Card -->
+        <div class="slots-booking-card card">
+          <div class="slots-header">
+            <h2 class="card-title">Available Appointment Slots</h2>
+            <p class="card-subtitle">
+              Select an available time slot below to proceed to the booking confirmation.
+            </p>
+          </div>
+
+          @if (availableSlots.length === 0) {
+            <div class="no-slots-box">
+              <span class="no-slots-icon">⏳</span>
+              <h4>No Available Slots Right Now</h4>
+              <p>All appointment slots for this practitioner are currently booked or pending schedule generation.</p>
+              <a [routerLink]="['/book']" [queryParams]="{ doctorId: doctor.doctorId }" class="btn btn-outline">
+                Inquire for Booking
+              </a>
+            </div>
+          } @else {
+            <div class="slots-grid">
+              @for (slot of availableSlots; track slot.slotId) {
+                <div 
+                  class="slot-chip" 
+                  [class.selected]="selectedSlot?.slotId === slot.slotId"
+                  (click)="selectSlot(slot)"
+                >
+                  <div class="slot-date">{{ slot.slotDate | date:'mediumDate' }}</div>
+                  <div class="slot-time">{{ slot.slotTime }}</div>
+                  <span class="slot-status">✓ Available</span>
+                </div>
+              }
+            </div>
+
+            <!-- Booking Action Box -->
+            <div class="booking-action-box" [class.active]="selectedSlot">
+              @if (selectedSlot) {
+                <div class="selected-summary">
+                  <div class="summary-item">
+                    <span class="lbl">Selected Date:</span>
+                    <span class="val">{{ selectedSlot.slotDate | date:'mediumDate' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="lbl">Time:</span>
+                    <span class="val">{{ selectedSlot.slotTime }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="lbl">Fee:</span>
+                    <span class="val fee">${{ doctor.consultationFee | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-proceed" (click)="proceedToBooking()">
+                  Proceed to Book Appointment →
+                </button>
+              } @else {
+                <p class="select-prompt">Please click on an appointment slot above to continue.</p>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
