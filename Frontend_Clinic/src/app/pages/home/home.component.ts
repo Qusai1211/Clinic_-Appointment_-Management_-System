@@ -64,3 +64,4 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/doctors'], { queryParams: { specialty: specialtyId } });
   }
 }
+

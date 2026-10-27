@@ -10,3 +10,4 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./not-found.component.less']
 })
 export class NotFoundComponent {}
+

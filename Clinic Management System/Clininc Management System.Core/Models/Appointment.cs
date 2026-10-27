@@ -18,3 +18,4 @@ namespace Clininc_Management_System.Core.Models
         public decimal? ConsultationFee { get; set; }
     }
 }
+

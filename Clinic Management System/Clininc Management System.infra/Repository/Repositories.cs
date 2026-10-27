@@ -264,6 +264,22 @@ namespace Clininc_Management_System.infra.Repository
             return rows > 0;
         }
 
+        public async Task<bool> UpdateWorkingHoursAsync(decimal workingHoursId, WorkingHoursUpsertDto dto)
+        {
+            const string sql = @"
+                UPDATE DoctorWorkingHours 
+                SET DayOfWeek = :DayOfWeek, StartTime = :StartTime, EndTime = :EndTime
+                WHERE WorkingHoursId = :WorkingHoursId";
+            var rows = await _dbContext.connection1.ExecuteAsync(sql, new
+            {
+                DayOfWeek = dto.DayOfWeek,
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                WorkingHoursId = workingHoursId
+            });
+            return rows > 0;
+        }
+
         public async Task<IEnumerable<AppointmentSlot>> GetSlotsByDoctorAsync(decimal doctorId, DateTime? date = null, bool availableOnly = false)
         {
             var sql = @"
@@ -320,6 +336,17 @@ namespace Clininc_Management_System.infra.Repository
             var rows = await _dbContext.connection1.ExecuteAsync(sql, new { SlotId = slotId });
             return rows > 0;
         }
+
+        public async Task<bool> UpdateSlotStatusAsync(decimal slotId, bool isAvailable)
+        {
+            const string sql = "UPDATE AppointmentSlots SET IsAvailable = :IsAvailable WHERE SlotId = :SlotId";
+            var rows = await _dbContext.connection1.ExecuteAsync(sql, new
+            {
+                IsAvailable = isAvailable ? 1 : 0,
+                SlotId = slotId
+            });
+            return rows > 0;
+        }
     }
 
     public class PatientRepository : IPatientRepository
@@ -368,6 +395,30 @@ namespace Clininc_Management_System.infra.Repository
 
             await cmd.ExecuteNonQueryAsync();
             return ((Oracle.ManagedDataAccess.Types.OracleDecimal)outParam.Value).Value;
+        }
+
+        public async Task<bool> UpdateAsync(decimal patientId, PatientUpsertDto dto)
+        {
+            const string sql = @"
+                UPDATE Patients
+                SET FullName = :FullName, PhoneNumber = :PhoneNumber, Email = :Email, DateOfBirth = TRUNC(:DateOfBirth)
+                WHERE PatientId = :PatientId";
+            var rows = await _dbContext.connection1.ExecuteAsync(sql, new
+            {
+                FullName = dto.FullName,
+                PhoneNumber = dto.PhoneNumber,
+                Email = dto.Email,
+                DateOfBirth = dto.DateOfBirth.Date,
+                PatientId = patientId
+            });
+            return rows > 0;
+        }
+
+        public async Task<bool> DeleteAsync(decimal patientId)
+        {
+            const string sql = "DELETE FROM Patients WHERE PatientId = :PatientId";
+            var rows = await _dbContext.connection1.ExecuteAsync(sql, new { PatientId = patientId });
+            return rows > 0;
         }
     }
 
@@ -520,6 +571,13 @@ namespace Clininc_Management_System.infra.Repository
 
             return await _dbContext.connection1.QueryFirstOrDefaultAsync<Admin>(sql, new { Username = username.Trim() });
         }
+
+        public async Task<bool> UpdatePasswordHashAsync(decimal adminId, string newPasswordHash)
+        {
+            const string sql = "UPDATE Admins SET PasswordHash = :PasswordHash WHERE AdminId = :AdminId";
+            var rows = await _dbContext.connection1.ExecuteAsync(sql, new { PasswordHash = newPasswordHash, AdminId = adminId });
+            return rows > 0;
+        }
     }
 
     public class DashboardRepository : IDashboardRepository
@@ -552,3 +610,4 @@ namespace Clininc_Management_System.infra.Repository
         }
     }
 }
+

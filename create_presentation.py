@@ -152,7 +152,7 @@ bullets_right = [
     "Frontend (Angular 21): Modern Single Page Application with standalone components, Zone.js change detection, reactive forms, and responsive LESS styling.",
     "Backend (ASP.NET Core 8 Web API): Clean 3-tier modular architecture (API, Core, Infrastructure) utilizing Dapper ORM and Oracle.ManagedDataAccess.Core.",
     "Database (Oracle 19c Enterprise): Relational normalized schema, foreign key cascades, constraints, views, and stored procedures with atomic transactions.",
-    "Security: Salted SHA-256 password hashing for administrators, JWT Bearer tokens with Claims-based authorization, and protected Angular route guards.",
+    "Security: PBKDF2 password hashing (100k iterations, 128-bit salt), transparent legacy migration, JWT Bearer tokens, and protected Angular route guards.",
     "Zero-Stub Integration: All UI views and analytics connect to real running Oracle database instances with live queries."
 ]
 for b in bullets_right:
@@ -342,7 +342,7 @@ cards_backend = [
         "Oracle.ManagedDataAccess.Core integration",
         "PL/SQL package stored procedure execution",
         "DynamicParameters for input/output cursors",
-        "Salted SHA-256 password hashing logic",
+        "PBKDF2 PasswordSecurity (100k iterations, random 128-bit salt)",
         "JWT token generation with symmetric security keys"
     ], Inches(4.866), Inches(1.5), Inches(3.6)),
     ("API Layer", "Controllers & Middleware", [
@@ -476,9 +476,9 @@ p.space_after = Pt(10)
 adm_items = [
     "Live KPI Stats: Real-time queries for total doctors, patients, appointments, scheduled, completed, and cancelled counts.",
     "Specialty Analytics Chart: Visual distribution of appointments grouped by medical specialty from Vw_AppointmentsBySpecialty.",
-    "Doctor Management: Add new doctors, update consultation fees, configure working hours and generate available slots.",
+    "Doctor & Schedule Management: Full doctor CRUD, consultation fees, weekly working hours editing, and slot availability toggles.",
     "Specialty Catalog: Dynamic administration of clinical departments, names, descriptions, and icon mappings.",
-    "Patient Directory: Searchable patient registry displaying complete appointment histories.",
+    "Patient Directory & Management: Searchable patient registry, detail view, patient record editing, and safe deletion.",
     "Appointment Lifecycle: Real-time status updates (Completed, Cancelled) with automatic slot reopening upon cancellation."
 ]
 for ai in adm_items:
@@ -583,3 +583,4 @@ p_conc.space_before = Pt(10)
 output_path = "presentation/Clinic_Appointment_Management_System_Presentation.pptx"
 prs.save(output_path)
 print(f"Presentation saved successfully to {output_path} with {len(prs.slides)} slides.")
+

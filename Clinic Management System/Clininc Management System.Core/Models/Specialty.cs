@@ -9,3 +9,4 @@ namespace Clininc_Management_System.Core.Models
         public int AppointmentCount { get; set; }
     }
 }
+

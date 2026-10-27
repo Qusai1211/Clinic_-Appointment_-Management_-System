@@ -72,11 +72,17 @@
                 <td>
                   <div class="actions-group">
                     <button class="btn btn-outline btn-sm" (click)="viewPatient(p)">
-                      🔍 View Profile
+                      🔍 View
+                    </button>
+                    <button class="btn btn-outline btn-sm" (click)="openEditModal(p)">
+                      ✏️ Edit
                     </button>
                     <a [routerLink]="['/book']" [queryParams]="{ patientId: p.patientId }" class="btn btn-primary btn-sm">
                       + Book
                     </a>
+                    <button class="btn btn-danger btn-sm" (click)="deletePatient(p)">
+                      🗑️
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -123,10 +129,52 @@
       </div>
 
       <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeModal(); openEditModal(selectedPatient)">
+          ✏️ Edit Profile
+        </button>
         <a [routerLink]="['/book']" [queryParams]="{ patientId: selectedPatient.patientId }" class="btn btn-primary" (click)="closeModal()">
           Book Appointment for Patient →
         </a>
         <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Patient Modal -->
+@if (isEditModalOpen) {
+  <div class="modal-backdrop" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Patient Record #{{ editForm.patientId }}</h3>
+        <button class="btn-close" (click)="closeEditModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group mb-3">
+          <label class="form-label">Full Legal Name *</label>
+          <input type="text" [(ngModel)]="editForm.fullName" class="form-control" placeholder="Patient Full Name" />
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Phone Number *</label>
+          <input type="text" [(ngModel)]="editForm.phoneNumber" class="form-control" placeholder="e.g. +962791234567" />
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Email Address *</label>
+          <input type="email" [(ngModel)]="editForm.email" class="form-control" placeholder="patient@example.com" />
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Date of Birth *</label>
+          <input type="date" [(ngModel)]="editForm.dateOfBirth" class="form-control" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="savePatientEdit()">Save Changes</button>
       </div>
     </div>
   </div>

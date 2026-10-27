@@ -113,6 +113,18 @@ namespace Clinic_Management_System.API.Controllers
             return Ok(new { Message = "Working hours deleted successfully." });
         }
 
+        [Authorize]
+        [HttpPut("working-hours/{workingHoursId}")]
+        public async Task<IActionResult> UpdateWorkingHours(decimal workingHoursId, [FromBody] WorkingHoursUpsertDto dto)
+        {
+            var updated = await _doctorService.UpdateWorkingHoursAsync(workingHoursId, dto);
+            if (!updated)
+            {
+                return NotFound(new { Message = $"Working hours record {workingHoursId} not found." });
+            }
+            return Ok(new { Message = "Working hours updated successfully." });
+        }
+
         [HttpGet("{id}/slots")]
         public async Task<IActionResult> GetSlots(decimal id, [FromQuery] DateTime? date, [FromQuery] bool availableOnly = false)
         {
@@ -140,5 +152,18 @@ namespace Clinic_Management_System.API.Controllers
             }
             return Ok(new { Message = "Slot deleted successfully." });
         }
+
+        [Authorize]
+        [HttpPut("slots/{slotId}/availability")]
+        public async Task<IActionResult> UpdateSlotAvailability(decimal slotId, [FromBody] SlotUpdateDto dto)
+        {
+            var updated = await _doctorService.UpdateSlotStatusAsync(slotId, dto.IsAvailable);
+            if (!updated)
+            {
+                return NotFound(new { Message = $"Slot {slotId} not found." });
+            }
+            return Ok(new { Message = $"Slot availability updated to {dto.IsAvailable} successfully." });
+        }
     }
 }
+

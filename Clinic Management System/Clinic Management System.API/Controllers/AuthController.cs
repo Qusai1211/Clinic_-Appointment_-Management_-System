@@ -46,3 +46,4 @@ namespace Clinic_Management_System.API.Controllers
         }
     }
 }
+

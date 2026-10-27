@@ -95,4 +95,18 @@ namespace Clininc_Management_System.Core.DTOs
         public DateTime SlotDate { get; set; }
         public string SlotTime { get; set; } = string.Empty;
     }
+
+    public class PatientUpsertDto
+    {
+        public string FullName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public DateTime DateOfBirth { get; set; }
+    }
+
+    public class SlotUpdateDto
+    {
+        public bool IsAvailable { get; set; }
+    }
 }
+

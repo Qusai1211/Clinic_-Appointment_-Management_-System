@@ -63,11 +63,17 @@ namespace Clininc_Management_System.infra.Service
         public Task<bool> DeleteWorkingHoursAsync(decimal workingHoursId)
             => _repository.DeleteWorkingHoursAsync(workingHoursId);
 
+        public Task<bool> UpdateWorkingHoursAsync(decimal workingHoursId, WorkingHoursUpsertDto dto)
+            => _repository.UpdateWorkingHoursAsync(workingHoursId, dto);
+
         public Task<IEnumerable<AppointmentSlot>> GetDoctorSlotsAsync(decimal doctorId, DateTime? date = null, bool availableOnly = false)
             => _repository.GetSlotsByDoctorAsync(doctorId, date, availableOnly);
 
         public Task<decimal> AddSlotAsync(SlotCreateDto dto)
             => _repository.AddSlotAsync(dto);
+
+        public Task<bool> UpdateSlotStatusAsync(decimal slotId, bool isAvailable)
+            => _repository.UpdateSlotStatusAsync(slotId, isAvailable);
 
         public Task<bool> DeleteSlotAsync(decimal slotId)
             => _repository.DeleteSlotAsync(slotId);
@@ -99,6 +105,21 @@ namespace Clininc_Management_System.infra.Service
 
             return _repository.RegisterPatientAsync(request);
         }
+
+        public Task<bool> UpdatePatientAsync(decimal patientId, PatientUpsertDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.FullName))
+                throw new ArgumentException("Full name is required.");
+            if (string.IsNullOrWhiteSpace(dto.PhoneNumber))
+                throw new ArgumentException("Phone number is required.");
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                throw new ArgumentException("Email is required.");
+
+            return _repository.UpdateAsync(patientId, dto);
+        }
+
+        public Task<bool> DeletePatientAsync(decimal patientId)
+            => _repository.DeleteAsync(patientId);
     }
 
     public class AppointmentService : IAppointmentService
@@ -204,10 +225,17 @@ namespace Clininc_Management_System.infra.Service
                 return new LoginResponse { Success = false, Message = "Invalid administrator credentials." };
             }
 
-            var inputHash = ComputeSha256(request.Password);
-            if (!string.Equals(inputHash, admin.PasswordHash, StringComparison.OrdinalIgnoreCase))
+            var isValid = Common.PasswordSecurity.VerifyPassword(request.Password, admin.PasswordHash, out bool needsRehash);
+            if (!isValid)
             {
                 return new LoginResponse { Success = false, Message = "Invalid administrator credentials." };
+            }
+
+            if (needsRehash)
+            {
+                // Transparently upgrade legacy hash to standard PBKDF2 with 100k iterations and secure salt
+                var upgradedHash = Common.PasswordSecurity.HashPassword(request.Password);
+                await _adminRepository.UpdatePasswordHashAsync(admin.AdminId, upgradedHash);
             }
 
             var secret = _configuration["JwtSettings:Secret"] ?? "ClinicAppointmentManagementSystemSuperSecretKey2026!#";
@@ -243,18 +271,6 @@ namespace Clininc_Management_System.infra.Service
                 ExpiresAt = expiresAt
             };
         }
-
-        private static string ComputeSha256(string raw)
-        {
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(raw));
-            var sb = new StringBuilder();
-            foreach (var b in bytes)
-            {
-                sb.Append(b.ToString("x2"));
-            }
-            return sb.ToString();
-        }
     }
 
     public class DashboardService : IDashboardService
@@ -270,3 +286,4 @@ namespace Clininc_Management_System.infra.Service
         public Task<IEnumerable<SpecialtyAppointmentChartItem>> GetSpecialtyChartDataAsync() => _repository.GetAppointmentsBySpecialtyAsync();
     }
 }
+

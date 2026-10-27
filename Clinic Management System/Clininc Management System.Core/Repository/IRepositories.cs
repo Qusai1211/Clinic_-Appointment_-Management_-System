@@ -23,10 +23,12 @@ namespace Clininc_Management_System.Core.Repository
 
         Task<IEnumerable<DoctorWorkingHours>> GetWorkingHoursByDoctorAsync(decimal doctorId);
         Task<decimal> AddWorkingHoursAsync(WorkingHoursUpsertDto dto);
+        Task<bool> UpdateWorkingHoursAsync(decimal workingHoursId, WorkingHoursUpsertDto dto);
         Task<bool> DeleteWorkingHoursAsync(decimal workingHoursId);
 
         Task<IEnumerable<AppointmentSlot>> GetSlotsByDoctorAsync(decimal doctorId, DateTime? date = null, bool availableOnly = false);
         Task<decimal> AddSlotAsync(SlotCreateDto dto);
+        Task<bool> UpdateSlotStatusAsync(decimal slotId, bool isAvailable);
         Task<bool> DeleteSlotAsync(decimal slotId);
     }
 
@@ -35,6 +37,8 @@ namespace Clininc_Management_System.Core.Repository
         Task<IEnumerable<Patient>> GetAllAsync(string? search = null);
         Task<Patient?> GetByIdAsync(decimal patientId);
         Task<decimal> RegisterPatientAsync(RegisterPatientRequest request);
+        Task<bool> UpdateAsync(decimal patientId, PatientUpsertDto dto);
+        Task<bool> DeleteAsync(decimal patientId);
     }
 
     public interface IAppointmentRepository
@@ -50,6 +54,7 @@ namespace Clininc_Management_System.Core.Repository
     public interface IAdminRepository
     {
         Task<Admin?> GetByUsernameAsync(string username);
+        Task<bool> UpdatePasswordHashAsync(decimal adminId, string newPasswordHash);
     }
 
     public interface IDashboardRepository
@@ -58,3 +63,4 @@ namespace Clininc_Management_System.Core.Repository
         Task<IEnumerable<SpecialtyAppointmentChartItem>> GetAppointmentsBySpecialtyAsync();
     }
 }
+

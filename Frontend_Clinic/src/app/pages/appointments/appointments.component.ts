@@ -92,3 +92,4 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 }
+

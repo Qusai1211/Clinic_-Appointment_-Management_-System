@@ -487,8 +487,9 @@ VALUES ('REF-20261028-1005', TRUNC(SYSDATE + 1), '10:00 AM', 'Scheduled', 1, 4, 
 COMMIT;
 
 -- 7. Insert Admins
--- Password is 'admin123' (SHA256: 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9)
+-- Default Password is 'admin123' (Secured using PBKDF2 with HMAC-SHA256, 100,000 iterations and 128-bit salt)
+-- Safe migration: Legacy SHA256 ('240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9') is also supported and auto-upgraded upon login.
 INSERT INTO Admins (AdminName, PasswordHash)
-VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9');
+VALUES ('admin', 'PBKDF2===');
 
 COMMIT;

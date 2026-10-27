@@ -100,6 +100,10 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/doctors/working-hours/${workingHoursId}`, { headers: this.getAuthHeaders() });
   }
 
+  updateDoctorWorkingHours(workingHoursId: number, data: { dayOfWeek: string; startTime: string; endTime: string }): Observable<any> {
+    return this.http.put(`${this.baseUrl}/doctors/working-hours/${workingHoursId}`, data, { headers: this.getAuthHeaders() });
+  }
+
   getDoctorSlots(doctorId: number, date?: string, availableOnly = false): Observable<AppointmentSlot[]> {
     let params = new HttpParams();
     if (date) params = params.set('date', date);
@@ -109,6 +113,10 @@ export class ApiService {
 
   addDoctorSlot(doctorId: number, data: { slotDate: string; slotTime: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/doctors/${doctorId}/slots`, data, { headers: this.getAuthHeaders() });
+  }
+
+  updateDoctorSlotAvailability(slotId: number, isAvailable: boolean): Observable<any> {
+    return this.http.put(`${this.baseUrl}/doctors/slots/${slotId}/availability`, { isAvailable }, { headers: this.getAuthHeaders() });
   }
 
   deleteDoctorSlot(slotId: number): Observable<any> {
@@ -128,6 +136,14 @@ export class ApiService {
 
   registerPatient(data: RegisterPatientRequest): Observable<{ success: boolean; message: string; patient?: Patient }> {
     return this.http.post<{ success: boolean; message: string; patient?: Patient }>(`${this.baseUrl}/patients/register`, data);
+  }
+
+  updatePatient(id: number, data: { fullName: string; phoneNumber: string; email: string; dateOfBirth: string }): Observable<any> {
+    return this.http.put(`${this.baseUrl}/patients/${id}`, data, { headers: this.getAuthHeaders() });
+  }
+
+  deletePatient(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/patients/${id}`, { headers: this.getAuthHeaders() });
   }
 
   // --- Appointments ---
@@ -152,19 +168,20 @@ export class ApiService {
   }
 
   cancelAppointment(id: number): Observable<any> {
-    return this.http.post(`${this.baseUrl}/appointments/${id}/cancel`, {});
+    return this.http.post(`${this.baseUrl}/appointments/${id}/cancel`, {}, { headers: this.getAuthHeaders() });
   }
 
   updateAppointmentStatus(id: number, status: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/appointments/${id}/status`, { status });
+    return this.http.put(`${this.baseUrl}/appointments/${id}/status`, { status }, { headers: this.getAuthHeaders() });
   }
 
   // --- Dashboard ---
   getDashboardStats(): Observable<AdminDashboardStats> {
-    return this.http.get<AdminDashboardStats>(`${this.baseUrl}/dashboard/stats`);
+    return this.http.get<AdminDashboardStats>(`${this.baseUrl}/dashboard/stats`, { headers: this.getAuthHeaders() });
   }
 
   getSpecialtyChartData(): Observable<SpecialtyAppointmentChartItem[]> {
-    return this.http.get<SpecialtyAppointmentChartItem[]>(`${this.baseUrl}/dashboard/specialty-chart`);
+    return this.http.get<SpecialtyAppointmentChartItem[]>(`${this.baseUrl}/dashboard/specialty-chart`, { headers: this.getAuthHeaders() });
   }
 }
+

@@ -205,8 +205,29 @@
           <div class="existing-items-list">
             @for (h of workingHoursList; track h.workingHoursId) {
               <div class="item-chip">
-                <span><strong>{{ h.dayOfWeek }}:</strong> {{ h.startTime }} – {{ h.endTime }}</span>
-                <button class="btn-delete-chip" (click)="deleteWorkingHours(h.workingHoursId)">&times;</button>
+                @if (editingWorkingHoursId === h.workingHoursId) {
+                  <div class="edit-chip-form d-flex gap-1 align-items-center">
+                    <select [(ngModel)]="editWorkingHourForm.dayOfWeek" class="form-control form-control-sm">
+                      <option>Sunday</option>
+                      <option>Monday</option>
+                      <option>Tuesday</option>
+                      <option>Wednesday</option>
+                      <option>Thursday</option>
+                      <option>Friday</option>
+                      <option>Saturday</option>
+                    </select>
+                    <input type="text" [(ngModel)]="editWorkingHourForm.startTime" class="form-control form-control-sm" style="width: 85px;">
+                    <input type="text" [(ngModel)]="editWorkingHourForm.endTime" class="form-control form-control-sm" style="width: 85px;">
+                    <button class="btn btn-primary btn-sm" (click)="saveWorkingHoursEdit()">Save</button>
+                    <button class="btn btn-secondary btn-sm" (click)="cancelEditWorkingHours()">✕</button>
+                  </div>
+                } @else {
+                  <span><strong>{{ h.dayOfWeek }}:</strong> {{ h.startTime }} – {{ h.endTime }}</span>
+                  <div class="chip-btns d-flex gap-1">
+                    <button class="btn btn-outline btn-sm py-0 px-1" (click)="startEditWorkingHours(h)" title="Edit">✏️</button>
+                    <button class="btn-delete-chip" (click)="deleteWorkingHours(h.workingHoursId)">&times;</button>
+                  </div>
+                }
               </div>
             }
           </div>
@@ -238,7 +259,12 @@
                   {{ slot.slotDate | date:'shortDate' }} | {{ slot.slotTime }}
                   <strong>({{ slot.isAvailable === 1 ? 'Available' : 'Booked' }})</strong>
                 </span>
-                <button class="btn-delete-chip" (click)="deleteSlot(slot.slotId)">&times;</button>
+                <div class="slot-actions d-flex gap-1 align-items-center">
+                  <button class="btn btn-outline btn-sm py-0 px-2" (click)="toggleSlotAvailability(slot)" [title]="slot.isAvailable === 1 ? 'Mark Unavailable' : 'Mark Available'">
+                    {{ slot.isAvailable === 1 ? 'Block' : 'Unblock' }}
+                  </button>
+                  <button class="btn-delete-chip" (click)="deleteSlot(slot.slotId)">&times;</button>
+                </div>
               </div>
             }
           </div>
@@ -257,3 +283,4 @@
     </div>
   </div>
 }
+

@@ -63,3 +63,4 @@ export class AdminDashboardComponent implements OnInit {
     return Math.max(Math.round((count / this.maxAppointmentCount) * 100), 4);
   }
 }
+

@@ -1,5 +1,6 @@
 using Clininc_Management_System.Core.DTOs;
 using Clininc_Management_System.Core.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinic_Management_System.API.Controllers
@@ -60,6 +61,55 @@ namespace Clinic_Management_System.API.Controllers
                     Message = "Patient registered successfully.",
                     Patient = patient
                 });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(decimal id, [FromBody] PatientUpsertDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.FullName))
+            {
+                return BadRequest(new { Message = "Full name is required." });
+            }
+            if (string.IsNullOrWhiteSpace(dto.PhoneNumber))
+            {
+                return BadRequest(new { Message = "Phone number is required." });
+            }
+
+            try
+            {
+                var updated = await _patientService.UpdatePatientAsync(id, dto);
+                if (!updated)
+                {
+                    return NotFound(new { Message = $"Patient with ID {id} not found." });
+                }
+
+                return Ok(new { Success = true, Message = "Patient record updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(decimal id)
+        {
+            try
+            {
+                var deleted = await _patientService.DeletePatientAsync(id);
+                if (!deleted)
+                {
+                    return NotFound(new { Message = $"Patient with ID {id} not found." });
+                }
+
+                return Ok(new { Success = true, Message = "Patient record deleted successfully." });
             }
             catch (Exception ex)
             {

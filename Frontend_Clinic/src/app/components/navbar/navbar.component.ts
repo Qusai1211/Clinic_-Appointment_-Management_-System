@@ -30,3 +30,4 @@ export class NavbarComponent {
     this.router.navigate(['/admin/login']);
   }
 }
+

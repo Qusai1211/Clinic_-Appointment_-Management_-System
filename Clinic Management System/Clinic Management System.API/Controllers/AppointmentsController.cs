@@ -1,5 +1,6 @@
 using Clininc_Management_System.Core.DTOs;
 using Clininc_Management_System.Core.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clinic_Management_System.API.Controllers
@@ -97,6 +98,7 @@ namespace Clinic_Management_System.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(decimal id, [FromBody] UpdateAppointmentStatusRequest request)
         {
@@ -118,3 +120,4 @@ namespace Clinic_Management_System.API.Controllers
         }
     }
 }
+

@@ -64,3 +64,4 @@ export class AppointmentConfirmationComponent implements OnInit {
     window.print();
   }
 }
+

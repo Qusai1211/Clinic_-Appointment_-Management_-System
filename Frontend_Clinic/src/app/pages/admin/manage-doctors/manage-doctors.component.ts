@@ -46,6 +46,13 @@ export class ManageDoctorsComponent implements OnInit {
     endTime: '05:00 PM'
   };
 
+  editingWorkingHoursId: number | null = null;
+  editWorkingHourForm = {
+    dayOfWeek: 'Sunday',
+    startTime: '09:00 AM',
+    endTime: '05:00 PM'
+  };
+
   newSlot = {
     slotDate: '',
     slotTime: '09:00 AM'
@@ -251,6 +258,57 @@ export class ManageDoctorsComponent implements OnInit {
     });
   }
 
+  startEditWorkingHours(h: DoctorWorkingHours): void {
+    this.editingWorkingHoursId = h.workingHoursId;
+    this.editWorkingHourForm = {
+      dayOfWeek: h.dayOfWeek,
+      startTime: h.startTime,
+      endTime: h.endTime
+    };
+    this.cdr.markForCheck();
+  }
+
+  cancelEditWorkingHours(): void {
+    this.editingWorkingHoursId = null;
+    this.cdr.markForCheck();
+  }
+
+  saveWorkingHoursEdit(): void {
+    if (!this.editingWorkingHoursId || !this.selectedDoctorForSchedule) return;
+
+    this.api.updateDoctorWorkingHours(this.editingWorkingHoursId, {
+      dayOfWeek: this.editWorkingHourForm.dayOfWeek,
+      startTime: this.editWorkingHourForm.startTime,
+      endTime: this.editWorkingHourForm.endTime
+    }).subscribe({
+      next: () => {
+        this.notify.success('Working hour schedule updated.');
+        this.editingWorkingHoursId = null;
+        this.loadDoctorSchedule(this.selectedDoctorForSchedule!.doctorId);
+      },
+      error: (err) => {
+        this.notify.error(err.error?.message || 'Failed to update working hours.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  toggleSlotAvailability(slot: AppointmentSlot): void {
+    if (!this.selectedDoctorForSchedule) return;
+
+    const newStatus = slot.isAvailable === 0;
+    this.api.updateDoctorSlotAvailability(slot.slotId, newStatus).subscribe({
+      next: () => {
+        this.notify.success(`Slot marked as ${newStatus ? 'Available' : 'Unavailable'}.`);
+        this.loadDoctorSchedule(this.selectedDoctorForSchedule!.doctorId);
+      },
+      error: (err) => {
+        this.notify.error(err.error?.message || 'Failed to update slot status.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   deleteSlot(slotId: number): void {
     if (!this.selectedDoctorForSchedule) return;
 
@@ -262,3 +320,4 @@ export class ManageDoctorsComponent implements OnInit {
     });
   }
 }
+

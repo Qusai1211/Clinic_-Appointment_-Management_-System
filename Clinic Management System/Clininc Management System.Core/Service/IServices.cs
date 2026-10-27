@@ -23,10 +23,12 @@ namespace Clininc_Management_System.Core.Service
 
         Task<IEnumerable<DoctorWorkingHours>> GetWorkingHoursAsync(decimal doctorId);
         Task<decimal> AddWorkingHoursAsync(WorkingHoursUpsertDto dto);
+        Task<bool> UpdateWorkingHoursAsync(decimal workingHoursId, WorkingHoursUpsertDto dto);
         Task<bool> DeleteWorkingHoursAsync(decimal workingHoursId);
 
         Task<IEnumerable<AppointmentSlot>> GetDoctorSlotsAsync(decimal doctorId, DateTime? date = null, bool availableOnly = false);
         Task<decimal> AddSlotAsync(SlotCreateDto dto);
+        Task<bool> UpdateSlotStatusAsync(decimal slotId, bool isAvailable);
         Task<bool> DeleteSlotAsync(decimal slotId);
     }
 
@@ -35,6 +37,8 @@ namespace Clininc_Management_System.Core.Service
         Task<IEnumerable<Patient>> GetPatientsAsync(string? search = null);
         Task<Patient?> GetPatientByIdAsync(decimal patientId);
         Task<decimal> RegisterPatientAsync(RegisterPatientRequest request);
+        Task<bool> UpdatePatientAsync(decimal patientId, PatientUpsertDto dto);
+        Task<bool> DeletePatientAsync(decimal patientId);
     }
 
     public interface IAppointmentService
@@ -58,3 +62,4 @@ namespace Clininc_Management_System.Core.Service
         Task<IEnumerable<SpecialtyAppointmentChartItem>> GetSpecialtyChartDataAsync();
     }
 }
+

@@ -39,3 +39,4 @@ export class NotificationService {
     setTimeout(() => this.remove(id), 5000);
   }
 }
+

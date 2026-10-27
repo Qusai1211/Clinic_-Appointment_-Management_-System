@@ -24,6 +24,15 @@ export class ManagePatientsComponent implements OnInit {
 
   selectedPatient: Patient | null = null;
 
+  isEditModalOpen = false;
+  editForm = {
+    patientId: 0,
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+    dateOfBirth: ''
+  };
+
   ngOnInit(): void {
     this.loadPatients();
   }
@@ -52,5 +61,62 @@ export class ManagePatientsComponent implements OnInit {
   closeModal(): void {
     this.selectedPatient = null;
     this.cdr.markForCheck();
+  }
+
+  openEditModal(p: Patient): void {
+    const dobStr = p.dateOfBirth ? new Date(p.dateOfBirth).toISOString().split('T')[0] : '';
+    this.editForm = {
+      patientId: p.patientId,
+      fullName: p.fullName,
+      phoneNumber: p.phoneNumber,
+      email: p.email,
+      dateOfBirth: dobStr
+    };
+    this.isEditModalOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  closeEditModal(): void {
+    this.isEditModalOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  savePatientEdit(): void {
+    if (!this.editForm.fullName.trim() || !this.editForm.phoneNumber.trim()) {
+      this.notify.warning('Full name and phone number are required.');
+      return;
+    }
+
+    this.api.updatePatient(this.editForm.patientId, {
+      fullName: this.editForm.fullName.trim(),
+      phoneNumber: this.editForm.phoneNumber.trim(),
+      email: this.editForm.email.trim(),
+      dateOfBirth: this.editForm.dateOfBirth
+    }).subscribe({
+      next: () => {
+        this.notify.success('Patient record updated successfully.');
+        this.closeEditModal();
+        this.loadPatients();
+      },
+      error: (err) => {
+        this.notify.error(err.error?.message || 'Failed to update patient record.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  deletePatient(p: Patient): void {
+    if (confirm(`Are you sure you want to delete patient "${p.fullName}"? Associated appointments will be cascade-removed.`)) {
+      this.api.deletePatient(p.patientId).subscribe({
+        next: () => {
+          this.notify.success('Patient record deleted successfully.');
+          this.loadPatients();
+        },
+        error: (err) => {
+          this.notify.error(err.error?.message || 'Failed to delete patient record.');
+          this.cdr.markForCheck();
+        }
+      });
+    }
   }
 }

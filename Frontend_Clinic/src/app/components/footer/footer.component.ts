@@ -12,3 +12,4 @@ import { RouterLink } from '@angular/router';
 export class FooterComponent {
   currentYear = new Date().getFullYear();
 }
+

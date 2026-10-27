@@ -88,3 +88,4 @@ export class ManageAppointmentsComponent implements OnInit {
     this.loadAppointments();
   }
 }
+

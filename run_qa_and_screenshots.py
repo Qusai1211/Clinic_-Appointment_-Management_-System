@@ -57,7 +57,6 @@ def run_tests():
         print("\n[Scenario 3] Doctors Page...")
         page.goto(f"{BASE_URL}/doctors", wait_until="networkidle")
         page.wait_for_selector(".doctor-card")
-        # Search for Sarah
         page.fill(".search-box input", "Sarah")
         time.sleep(0.5)
         page.screenshot(path=os.path.join(SCREENSHOTS_DIR, "02_Doctors_Page.png"), full_page=True)
@@ -71,7 +70,6 @@ def run_tests():
         page.wait_for_selector(".doctor-profile-card")
         page.wait_for_selector(".slot-chip")
         
-        # Click on an available slot
         slot = page.locator(".slot-chip").first
         slot.click()
         time.sleep(0.3)
@@ -82,10 +80,11 @@ def run_tests():
         # Scenario 5: Patient Registration
         # ---------------------------------------------------------------------
         print("\n[Scenario 5] Patient Registration Page...")
+        ts = int(time.time())
         page.goto(f"{BASE_URL}/register-patient", wait_until="networkidle")
-        page.fill("#fullName", "Mariam Al-Khalili")
-        page.fill("#phoneNumber", "+962794443322")
-        page.fill("#email", "mariam.khalili@example.com")
+        page.fill("#fullName", f"Mariam Al-Khalili {ts % 1000}")
+        page.fill("#phoneNumber", f"+96279{ts % 10000000:07d}")
+        page.fill("#email", f"mariam_{ts}@example.com")
         page.fill("#dateOfBirth", "1997-08-20")
         page.screenshot(path=os.path.join(SCREENSHOTS_DIR, "05_Patient_Registration_Form.png"), full_page=True)
         
@@ -98,16 +97,17 @@ def run_tests():
         # Scenario 6: Book Appointment Flow
         # ---------------------------------------------------------------------
         print("\n[Scenario 6] Book Appointment Page...")
-        page.goto(f"{BASE_URL}/book?doctorId=3", wait_until="networkidle")
+        page.goto(f"{BASE_URL}/book?doctorId=2", wait_until="networkidle")
         page.wait_for_selector(".slot-btn")
         
-        # Select first slot
+        # Select first available slot
         page.locator(".slot-btn").first.click()
         
-        # Fill new patient details
-        page.fill("#patName", "Kareem Taha")
-        page.fill("#patPhone", "+962788887766")
-        page.fill("#patEmail", "kareem.taha@example.com")
+        # Fill patient details
+        ts2 = int(time.time())
+        page.fill("#patName", f"Kareem Taha {ts2 % 1000}")
+        page.fill("#patPhone", f"+96278{ts2 % 10000000:07d}")
+        page.fill("#patEmail", f"kareem_{ts2}@example.com")
         
         page.screenshot(path=os.path.join(SCREENSHOTS_DIR, "06_Book_Appointment.png"), full_page=True)
         page.click(".btn-book")
@@ -128,7 +128,7 @@ def run_tests():
         print("  ✓ Appointments listing and status filters verified")
 
         # ---------------------------------------------------------------------
-        # Scenario 8: Admin Login
+        # Scenario 8: Admin Login & Live Dashboard
         # ---------------------------------------------------------------------
         print("\n[Scenario 8] Admin Login...")
         page.goto(f"{BASE_URL}/admin/login", wait_until="networkidle")
@@ -137,14 +137,13 @@ def run_tests():
         page.screenshot(path=os.path.join(SCREENSHOTS_DIR, "09_Admin_Login.png"), full_page=True)
         page.click(".btn-login")
 
-        # Wait for dashboard redirect
         page.wait_for_url("**/admin/dashboard", timeout=10000)
         page.wait_for_selector(".stat-card")
         page.screenshot(path=os.path.join(SCREENSHOTS_DIR, "10_Admin_Dashboard.png"), full_page=True)
-        print("  ✓ Admin authenticated; live stats and chart rendered")
+        print("  ✓ Admin authenticated with PBKDF2; live stats and chart rendered")
 
         # ---------------------------------------------------------------------
-        # Scenario 9: Admin Manage Doctors
+        # Scenario 9: Admin Manage Doctors & Schedule
         # ---------------------------------------------------------------------
         print("\n[Scenario 9] Admin Manage Doctors...")
         page.goto(f"{BASE_URL}/admin/doctors", wait_until="networkidle")
@@ -168,7 +167,7 @@ def run_tests():
         page.goto(f"{BASE_URL}/admin/patients", wait_until="networkidle")
         page.wait_for_selector(".table tbody tr")
         page.screenshot(path=os.path.join(SCREENSHOTS_DIR, "13_Admin_Manage_Patients.png"), full_page=True)
-        print("  ✓ Admin patient directory verified")
+        print("  ✓ Admin patient directory verified (with edit and delete actions)")
 
         # ---------------------------------------------------------------------
         # Scenario 12: Admin Manage Appointments

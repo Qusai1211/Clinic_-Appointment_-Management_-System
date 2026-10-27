@@ -85,3 +85,4 @@ export class PatientRegistrationComponent {
     this.cdr.markForCheck();
   }
 }
+
