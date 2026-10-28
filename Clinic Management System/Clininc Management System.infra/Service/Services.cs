@@ -238,7 +238,11 @@ namespace Clininc_Management_System.infra.Service
                 await _adminRepository.UpdatePasswordHashAsync(admin.AdminId, upgradedHash);
             }
 
-            var secret = _configuration["JwtSettings:Secret"] ?? "ClinicAppointmentManagementSystemSuperSecretKey2026!#";
+            var secret = _configuration["JwtSettings:Secret"];
+            if (string.IsNullOrWhiteSpace(secret) || secret.Contains("YOUR_SECURE_JWT_SECRET"))
+            {
+                secret = "ClinicAppointmentManagementSystemDefaultDevKey2026!#";
+            }
             var issuer = _configuration["JwtSettings:Issuer"] ?? "ClinicAPI";
             var audience = _configuration["JwtSettings:Audience"] ?? "ClinicClient";
             var expiresAt = DateTime.UtcNow.AddDays(7);

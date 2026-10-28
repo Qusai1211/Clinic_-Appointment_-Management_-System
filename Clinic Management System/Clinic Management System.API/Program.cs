@@ -74,7 +74,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // 6. Authentication & JWT
-var jwtSecret = builder.Configuration["JwtSettings:Secret"] ?? "ClinicAppointmentManagementSystemSuperSecretKey2026!#";
+var jwtSecret = builder.Configuration["JwtSettings:Secret"];
+if (string.IsNullOrWhiteSpace(jwtSecret) || jwtSecret.Contains("YOUR_SECURE_JWT_SECRET"))
+{
+    jwtSecret = "ClinicAppointmentManagementSystemDefaultDevKey2026!#";
+}
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "ClinicAPI";
 var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "ClinicClient";
 
