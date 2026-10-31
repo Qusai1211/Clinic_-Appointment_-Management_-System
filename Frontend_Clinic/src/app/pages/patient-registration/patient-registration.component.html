@@ -1,0 +1,133 @@
+<div class="page-container py-5">
+  <div class="container">
+    <div class="registration-wrapper">
+      @if (registeredPatient) {
+        <!-- Registration Confirmation State -->
+        <div class="success-card card text-center">
+          <div class="success-icon">✓</div>
+          <h2 class="success-title">Registration Confirmed!</h2>
+          <p class="success-subtitle">
+            Patient record has been securely stored in the clinic's database.
+          </p>
+
+          <div class="patient-id-badge">
+            <span class="lbl">Patient ID:</span>
+            <span class="val">#{{ registeredPatient.patientId }}</span>
+          </div>
+
+          <div class="patient-details-box">
+            <div class="detail-row">
+              <span class="detail-lbl">Full Name:</span>
+              <span class="detail-val">{{ registeredPatient.fullName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">Phone Number:</span>
+              <span class="detail-val">{{ registeredPatient.phoneNumber }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">Email Address:</span>
+              <span class="detail-val">{{ registeredPatient.email }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">Date of Birth:</span>
+              <span class="detail-val">{{ registeredPatient.dateOfBirth | date:'mediumDate' }}</span>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <a [routerLink]="['/book']" [queryParams]="{ patientId: registeredPatient.patientId }" class="btn btn-primary">
+              Book Appointment Now →
+            </a>
+            <button class="btn btn-secondary" (click)="resetForm()">
+              Register Another Patient
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Registration Form Card -->
+        <div class="form-card card">
+          <div class="card-header-custom">
+            <span class="badge-pill">New & Existing Patients</span>
+            <h1 class="form-title">Patient Registration</h1>
+            <p class="form-desc">
+              Create or verify your patient profile with Al-Amal Clinic for faster appointment booking and medical record tracking.
+            </p>
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert-error">
+              <span>⚠️ {{ errorMessage }}</span>
+            </div>
+          }
+
+          <form (ngSubmit)="onSubmit()" class="registration-form">
+            <div class="form-group">
+              <label class="form-label" for="fullName">Full Legal Name *</label>
+              <input 
+                type="text" 
+                id="fullName" 
+                [(ngModel)]="fullName" 
+                name="fullName" 
+                class="form-control" 
+                placeholder="e.g. Johnathan Davis" 
+                required 
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col">
+                <label class="form-label" for="phoneNumber">Phone Number *</label>
+                <input 
+                  type="tel" 
+                  id="phoneNumber" 
+                  [(ngModel)]="phoneNumber" 
+                  name="phoneNumber" 
+                  class="form-control" 
+                  placeholder="e.g. +962 7 9111 2233" 
+                  required 
+                />
+              </div>
+
+              <div class="form-group col">
+                <label class="form-label" for="email">Email Address *</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  [(ngModel)]="email" 
+                  name="email" 
+                  class="form-control" 
+                  placeholder="name@example.com" 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="dateOfBirth">Date of Birth *</label>
+              <input 
+                type="date" 
+                id="dateOfBirth" 
+                [(ngModel)]="dateOfBirth" 
+                name="dateOfBirth" 
+                class="form-control" 
+                required 
+              />
+            </div>
+
+            <div class="form-info-note">
+              <span class="icon">ℹ️</span>
+              <span>Duplicate detection is enabled. If a record with your phone number or email already exists, your existing patient ID will be safely retrieved.</span>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-submit" [disabled]="isSubmitting">
+                {{ isSubmitting ? 'Registering in Database...' : 'Register Patient' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+

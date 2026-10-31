@@ -1,0 +1,286 @@
+<div class="page-container py-4">
+  <div class="container">
+    <!-- Header -->
+    <div class="mgmt-header">
+      <div>
+        <nav class="breadcrumb-sub">
+          <a routerLink="/admin/dashboard">Admin Dashboard</a>
+          <span class="sep">/</span>
+          <span>Doctors Management</span>
+        </nav>
+        <h1 class="page-title">Manage Doctors & Schedules</h1>
+        <p class="page-desc">Create, update, and manage doctor records, medical specialties, working hours, and slots.</p>
+      </div>
+
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        + Add New Doctor
+      </button>
+    </div>
+
+    <!-- Search Toolbar -->
+    <div class="toolbar card">
+      <div class="search-box">
+        <span class="icon">🔍</span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (ngModelChange)="loadData()" 
+          placeholder="Filter doctors by name, qualifications, or specialty..." 
+          class="form-control"
+        />
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Loading doctor records from Oracle Database...</p>
+      </div>
+    } @else {
+      <!-- Doctors Table -->
+      <div class="table-responsive card p-0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Doctor Name</th>
+              <th>Specialty</th>
+              <th>Fee</th>
+              <th>Featured</th>
+              <th>Qualifications</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (doc of doctors; track doc.doctorId) {
+              <tr>
+                <td><strong>#{{ doc.doctorId }}</strong></td>
+                <td>
+                  <div class="doc-title-cell">
+                    <span class="doc-full-name">{{ doc.fullName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge badge-info">{{ doc.specialtyName || '—' }}</span>
+                </td>
+                <td>
+                  <span class="fee-text">${{ doc.consultationFee | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  @if (doc.isFeatured === 1) {
+                    <span class="badge badge-scheduled">⭐ Yes</span>
+                  } @else {
+                    <span class="badge-no">No</span>
+                  }
+                </td>
+                <td>
+                  <span class="qual-cell" [title]="doc.qualifications || ''">
+                    {{ doc.qualifications || '—' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons-group">
+                    <button class="btn btn-outline btn-sm" (click)="openScheduleModal(doc)" title="Manage Hours & Slots">
+                      📅 Hours & Slots
+                    </button>
+                    <button class="btn btn-secondary btn-sm" (click)="openEditModal(doc)">
+                      ✏️ Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm" (click)="deleteDoctor(doc)">
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal: Doctor Upsert Form -->
+@if (isDoctorModalOpen) {
+  <div class="modal-backdrop" (click)="closeDoctorModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">{{ isEditing ? 'Edit Doctor Record' : 'Add New Doctor' }}</h3>
+        <button class="btn-close" (click)="closeDoctorModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Full Doctor Name *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="doctorForm.fullName" 
+            class="form-control" 
+            placeholder="e.g. Dr. Sarah Johnson" 
+            required 
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label class="form-label">Medical Specialty *</label>
+            <select [(ngModel)]="doctorForm.specialtyId" class="form-control">
+              <option [value]="0">-- Select Specialty --</option>
+              @for (s of specialties; track s.specialtyId) {
+                <option [value]="s.specialtyId">{{ s.specialtyName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group col">
+            <label class="form-label">Consultation Fee ($) *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="doctorForm.consultationFee" 
+              class="form-control" 
+              min="0" 
+              step="5" 
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Qualifications & Experience</label>
+          <textarea 
+            [(ngModel)]="doctorForm.qualifications" 
+            class="form-control" 
+            rows="2" 
+            placeholder="e.g. MD, FACC - Harvard Medical School, 15+ years experience"
+          ></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label class="form-label">Featured on Homepage?</label>
+            <select [(ngModel)]="doctorForm.isFeatured" class="form-control">
+              <option [value]="0">No</option>
+              <option [value]="1">Yes (Featured)</option>
+            </select>
+          </div>
+
+          <div class="form-group col">
+            <label class="form-label">Profile Image Asset</label>
+            <input 
+              type="text" 
+              [(ngModel)]="doctorForm.profileImageUrl" 
+              class="form-control" 
+              placeholder="assets/images/doctors/doctor1.jpg" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeDoctorModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveDoctor()">
+          {{ isEditing ? 'Save Changes' : 'Create Doctor' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Working Hours & Slots Management -->
+@if (isScheduleModalOpen && selectedDoctorForSchedule) {
+  <div class="modal-backdrop" (click)="closeScheduleModal()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Schedule for {{ selectedDoctorForSchedule.fullName }}</h3>
+          <span class="sub">{{ selectedDoctorForSchedule.specialtyName }}</span>
+        </div>
+        <button class="btn-close" (click)="closeScheduleModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- 1. Working Hours Section -->
+        <div class="section-box mb-4">
+          <h4 class="box-title">Weekly Working Days & Hours</h4>
+          
+          <div class="existing-items-list">
+            @for (h of workingHoursList; track h.workingHoursId) {
+              <div class="item-chip">
+                @if (editingWorkingHoursId === h.workingHoursId) {
+                  <div class="edit-chip-form d-flex gap-1 align-items-center">
+                    <select [(ngModel)]="editWorkingHourForm.dayOfWeek" class="form-control form-control-sm">
+                      <option>Sunday</option>
+                      <option>Monday</option>
+                      <option>Tuesday</option>
+                      <option>Wednesday</option>
+                      <option>Thursday</option>
+                      <option>Friday</option>
+                      <option>Saturday</option>
+                    </select>
+                    <input type="text" [(ngModel)]="editWorkingHourForm.startTime" class="form-control form-control-sm" style="width: 85px;">
+                    <input type="text" [(ngModel)]="editWorkingHourForm.endTime" class="form-control form-control-sm" style="width: 85px;">
+                    <button class="btn btn-primary btn-sm" (click)="saveWorkingHoursEdit()">Save</button>
+                    <button class="btn btn-secondary btn-sm" (click)="cancelEditWorkingHours()">✕</button>
+                  </div>
+                } @else {
+                  <span><strong>{{ h.dayOfWeek }}:</strong> {{ h.startTime }} – {{ h.endTime }}</span>
+                  <div class="chip-btns d-flex gap-1">
+                    <button class="btn btn-outline btn-sm py-0 px-1" (click)="startEditWorkingHours(h)" title="Edit">✏️</button>
+                    <button class="btn-delete-chip" (click)="deleteWorkingHours(h.workingHoursId)">&times;</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="add-row mt-2">
+            <select [(ngModel)]="newWorkingHour.dayOfWeek" class="form-control form-control-sm">
+              <option>Sunday</option>
+              <option>Monday</option>
+              <option>Tuesday</option>
+              <option>Wednesday</option>
+              <option>Thursday</option>
+              <option>Friday</option>
+              <option>Saturday</option>
+            </select>
+            <input type="text" [(ngModel)]="newWorkingHour.startTime" class="form-control form-control-sm" placeholder="09:00 AM">
+            <input type="text" [(ngModel)]="newWorkingHour.endTime" class="form-control form-control-sm" placeholder="05:00 PM">
+            <button class="btn btn-primary btn-sm" (click)="addWorkingHours()">+ Add Day</button>
+          </div>
+        </div>
+
+        <!-- 2. Appointment Slots Section -->
+        <div class="section-box">
+          <h4 class="box-title">Appointment Slots (Available in DB)</h4>
+
+          <div class="existing-slots-list">
+            @for (slot of slotsList; track slot.slotId) {
+              <div class="slot-badge-item" [class.booked]="slot.isAvailable === 0">
+                <span class="slot-details">
+                  {{ slot.slotDate | date:'shortDate' }} | {{ slot.slotTime }}
+                  <strong>({{ slot.isAvailable === 1 ? 'Available' : 'Booked' }})</strong>
+                </span>
+                <div class="slot-actions d-flex gap-1 align-items-center">
+                  <button class="btn btn-outline btn-sm py-0 px-2" (click)="toggleSlotAvailability(slot)" [title]="slot.isAvailable === 1 ? 'Mark Unavailable' : 'Mark Available'">
+                    {{ slot.isAvailable === 1 ? 'Block' : 'Unblock' }}
+                  </button>
+                  <button class="btn-delete-chip" (click)="deleteSlot(slot.slotId)">&times;</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="add-row mt-2">
+            <input type="date" [(ngModel)]="newSlot.slotDate" class="form-control form-control-sm">
+            <input type="text" [(ngModel)]="newSlot.slotTime" class="form-control form-control-sm" placeholder="e.g. 10:00 AM">
+            <button class="btn btn-primary btn-sm" (click)="addSlot()">+ Add Slot</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeScheduleModal()">Done</button>
+      </div>
+    </div>
+  </div>
+}
+

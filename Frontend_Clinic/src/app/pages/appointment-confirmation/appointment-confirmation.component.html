@@ -1,0 +1,113 @@
+<div class="page-container py-5">
+  <div class="container">
+    <div class="confirmation-box">
+      @if (isLoading) {
+        <div class="state-container">
+          <div class="spinner"></div>
+          <p>Retrieving appointment details from database...</p>
+        </div>
+      } @else if (errorMessage || !appointment) {
+        <div class="card error-card text-center">
+          <span class="error-icon">⚠️</span>
+          <h2>Appointment Record Not Found</h2>
+          <p>{{ errorMessage }}</p>
+          <a routerLink="/" class="btn btn-primary mt-3">Return to Home</a>
+        </div>
+      } @else {
+        <!-- Success Confirmation Card -->
+        <div class="confirmation-card card printable-area">
+          <div class="card-hero text-center">
+            <div class="check-circle">✓</div>
+            <span class="badge-confirmed">Appointment Confirmed</span>
+            <h1 class="card-heading">Your Booking Is Successful!</h1>
+            <p class="card-subtext">
+              A clinical consultation slot has been reserved and persisted in our Oracle database.
+            </p>
+          </div>
+
+          <!-- Reference Number Banner -->
+          <div class="ref-banner">
+            <div class="ref-info">
+              <span class="ref-label">Reference Number</span>
+              <span class="ref-code">{{ appointment.referenceNumber }}</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" (click)="copyReference()">
+              {{ copied ? 'Copied! ✓' : 'Copy Ref' }}
+            </button>
+          </div>
+
+          <!-- Appointment Full Details -->
+          <div class="details-section">
+            <h3 class="section-label">Consultation Details</h3>
+
+            <div class="details-grid">
+              <div class="detail-item">
+                <span class="detail-title">Patient Name</span>
+                <strong class="detail-value">{{ appointment.patientName || 'Patient' }}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-title">Practitioner</span>
+                <strong class="detail-value">{{ appointment.doctorName }}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-title">Medical Specialty</span>
+                <strong class="detail-value">{{ appointment.specialtyName }}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-title">Appointment Date</span>
+                <strong class="detail-value">{{ appointment.appointmentDate | date:'fullDate' }}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-title">Appointment Time</span>
+                <strong class="detail-value highlight-time">{{ appointment.appointmentTime }}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-title">Status</span>
+                <span class="badge badge-scheduled">{{ appointment.status }}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-title">Consultation Fee</span>
+                <strong class="detail-value fee-text">${{ (appointment.consultationFee || 0) | number:'1.2-2' }}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-title">Clinic Location</span>
+                <strong class="detail-value">Zahran St., Amman, Jordan</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Important Instructions -->
+          <div class="instructions-box">
+            <h4>📋 Patient Instructions</h4>
+            <ul>
+              <li>Please arrive at the clinic 15 minutes prior to your scheduled time slot.</li>
+              <li>Present your Reference Number (<strong>{{ appointment.referenceNumber }}</strong>) at the reception desk.</li>
+              <li>If you need to reschedule or cancel, you can do so online using the "My Appointments" portal.</li>
+            </ul>
+          </div>
+
+          <!-- Actions -->
+          <div class="confirmation-actions no-print">
+            <button class="btn btn-secondary" (click)="printConfirmation()">
+              🖨️ Print Confirmation
+            </button>
+            <a routerLink="/appointments" class="btn btn-outline">
+              View All Appointments
+            </a>
+            <a routerLink="/" class="btn btn-primary">
+              Return to Home Page
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+

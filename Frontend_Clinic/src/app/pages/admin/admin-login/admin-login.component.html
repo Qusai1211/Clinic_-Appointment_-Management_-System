@@ -1,0 +1,76 @@
+<div class="login-wrapper py-5">
+  <div class="container">
+    <div class="login-card card">
+      <div class="card-header text-center">
+        <div class="lock-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <span class="portal-badge">Authorized Staff Only</span>
+        <h1 class="portal-title">Administrator Login</h1>
+        <p class="portal-desc">
+          Sign in to access clinic statistics, doctors management, working hours, and appointment schedules.
+        </p>
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert-error">
+          <span>⚠️ {{ errorMessage }}</span>
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="username">Username *</label>
+          <input 
+            type="text" 
+            id="username" 
+            [(ngModel)]="username" 
+            name="username" 
+            class="form-control" 
+            placeholder="e.g. admin" 
+            required 
+            autocomplete="username"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password *</label>
+          <input 
+            type="password" 
+            id="password" 
+            [(ngModel)]="password" 
+            name="password" 
+            class="form-control" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="current-password"
+          />
+        </div>
+
+        <!-- Default Credentials Helper Banner for Evaluation / University QA -->
+        <div class="credentials-hint">
+          <div class="hint-header">
+            <span class="hint-icon">🔑</span>
+            <strong>Default Evaluation Credentials:</strong>
+          </div>
+          <div class="hint-body">
+            <span>Username: <code>admin</code></span>
+            <span>Password: <code>admin123</code></span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-login" [disabled]="isLoggingIn">
+          {{ isLoggingIn ? 'Authenticating with Oracle Backend...' : 'Sign In to Dashboard' }}
+        </button>
+      </form>
+
+      <div class="card-footer text-center">
+        <a routerLink="/" class="back-link">← Return to Public Clinic Portal</a>
+      </div>
+    </div>
+  </div>
+</div>
+

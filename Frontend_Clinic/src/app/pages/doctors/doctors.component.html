@@ -1,0 +1,129 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <span class="page-subtitle">Expert Healthcare Practitioners</span>
+      <h1 class="page-title">Find & Consult Our Doctors</h1>
+      <p class="page-desc">
+        Browse certified medical specialists across all clinical departments, filter by specialty, and book your consultation online.
+      </p>
+    </div>
+  </div>
+
+  <div class="container main-section">
+    <!-- Filter and Search Toolbar -->
+    <div class="filter-toolbar card">
+      <div class="search-box">
+        <span class="icon">🔍</span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (ngModelChange)="onFilterChange()"
+          placeholder="Search by doctor name or qualification..." 
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-controls">
+        <!-- Specialty Filter -->
+        <div class="filter-item">
+          <label class="filter-label">Specialty:</label>
+          <select 
+            [(ngModel)]="selectedSpecialtyId" 
+            (ngModelChange)="onFilterChange()"
+            class="form-control select-ctrl"
+          >
+            <option [value]="0">All Specialties</option>
+            @for (s of specialties; track s.specialtyId) {
+              <option [value]="s.specialtyId">{{ s.specialtyName }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Sort Filter -->
+        <div class="filter-item">
+          <label class="filter-label">Sort By:</label>
+          <select 
+            [(ngModel)]="sortBy" 
+            (ngModelChange)="onFilterChange()"
+            class="form-control select-ctrl"
+          >
+            <option value="name_asc">Name: A to Z</option>
+            <option value="name_desc">Name: Z to A</option>
+            <option value="specialty">Specialty</option>
+            <option value="fee_asc">Consultation Fee: Low to High</option>
+            <option value="fee_desc">Consultation Fee: High to Low</option>
+          </select>
+        </div>
+
+        <!-- Reset Button -->
+        <button class="btn btn-secondary btn-reset" (click)="clearFilters()">
+          Reset Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Filter Summary -->
+    <div class="results-meta">
+      <p class="results-count">
+        Showing <strong>{{ doctors.length }}</strong> doctor{{ doctors.length === 1 ? '' : 's' }}
+        @if (selectedSpecialtyId > 0 || searchQuery) {
+          <span> matching your filters</span>
+        }
+      </p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Loading medical practitioners from database...</p>
+      </div>
+    } @else if (doctors.length === 0) {
+      <!-- Empty Results State -->
+      <div class="state-container empty-state card">
+        <span class="empty-icon">🩺</span>
+        <h3>No doctors found</h3>
+        <p>No medical specialists match your search criteria. Please adjust your keywords or clear your filters.</p>
+        <button class="btn btn-primary" (click)="clearFilters()">View All Doctors</button>
+      </div>
+    } @else {
+      <!-- Doctors List Grid -->
+      <div class="doctors-grid">
+        @for (doctor of doctors; track doctor.doctorId) {
+          <div class="doctor-card">
+            <div class="card-top">
+              <div class="doctor-avatar">
+                <span class="initials">{{ doctor.fullName.charAt(4) || 'D' }}</span>
+              </div>
+              @if (doctor.isFeatured === 1) {
+                <span class="featured-badge">⭐ Featured</span>
+              }
+            </div>
+
+            <div class="card-content">
+              <span class="specialty-badge">{{ doctor.specialtyName || 'Specialist' }}</span>
+              <h2 class="doctor-name">{{ doctor.fullName }}</h2>
+              <p class="doctor-qualifications">{{ doctor.qualifications || 'Certified Clinical Practitioner' }}</p>
+
+              <div class="fee-display">
+                <span class="fee-label">Consultation Fee</span>
+                <span class="fee-value">${{ doctor.consultationFee | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <a [routerLink]="['/doctors', doctor.doctorId]" class="btn btn-outline btn-sm">
+                View Schedule & Slots
+              </a>
+              <a [routerLink]="['/book']" [queryParams]="{ doctorId: doctor.doctorId }" class="btn btn-primary btn-sm">
+                Book Consultation
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
