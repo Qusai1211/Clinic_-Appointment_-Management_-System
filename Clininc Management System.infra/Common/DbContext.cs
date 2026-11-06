@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 
 namespace Clininc_Management_System.infra.Common
 {
-    public class DbContext:IDbContext
+    public class PasswordSecurity:IDbContext
     {
         private DbConnection? connection;
         private readonly IConfiguration configuration;
-        public DbContext(IConfiguration configuration1)
+        public PasswordSecurity(IConfiguration configuration1)
         {
             configuration = configuration1;
         }
@@ -37,7 +37,7 @@ namespace Clininc_Management_System.infra.Common
             }
         }
 
-        internal static bool VerifyPassword(string password, string passwordhash, out bool needsRehash)
+        public static bool VerifyPassword(string password, string passwordhash, out bool needsRehash)
         {
             throw new NotImplementedException();
         }

@@ -40,7 +40,7 @@ namespace Clininc_Management_System.infra.Service
                 return new LoginResponse { Success = false, Message = "Invalid administrator credentials." };
             }
 
-            var isValid = Common.DbContext.VerifyPassword(request.Password, admin.Passwordhash, out bool needsRehash);
+            var isValid = Common.PasswordSecurity.VerifyPassword(request.Password, admin.Passwordhash, out bool needsRehash);
             if (!isValid)
             {
                 return new LoginResponse { Success = false, Message = "Invalid administrator credentials." };

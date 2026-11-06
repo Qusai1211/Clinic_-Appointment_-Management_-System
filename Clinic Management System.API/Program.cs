@@ -21,7 +21,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IDbContext, DbContext>();
+builder.Services.AddScoped<IDbContext, PasswordSecurity>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IAdminService,AdminService>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
