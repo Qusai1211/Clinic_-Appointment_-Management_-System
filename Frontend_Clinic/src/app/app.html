@@ -1,0 +1,21 @@
+<div class="app-layout">
+  <app-navbar></app-navbar>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-footer></app-footer>
+
+  <!-- Global Toast Notifications Container -->
+  @if (notificationService.toasts().length > 0) {
+    <div class="toast-container">
+      @for (toast of notificationService.toasts(); track toast.id) {
+        <div class="toast" [ngClass]="'toast-' + toast.type">
+          <span>{{ toast.text }}</span>
+          <button class="toast-close" (click)="notificationService.remove(toast.id)">&times;</button>
+        </div>
+      }
+    </div>
+  }
+</div>

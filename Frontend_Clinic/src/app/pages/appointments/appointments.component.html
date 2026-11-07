@@ -1,0 +1,187 @@
+<div class="page-container py-4">
+  <div class="container">
+    <!-- Header -->
+    <div class="page-header-box">
+      <div class="header-left">
+        <span class="header-tag">Consultation Schedule</span>
+        <h1 class="page-title">Clinic Appointments</h1>
+        <p class="page-desc">
+          Search and view scheduled appointments, verify consultation statuses, or manage cancellations.
+        </p>
+      </div>
+      <div class="header-right">
+        <a routerLink="/book" class="btn btn-primary">
+          + Book New Appointment
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="filter-card card">
+      <div class="search-input-box">
+        <span class="icon">🔍</span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (ngModelChange)="onFilterChange()"
+          placeholder="Search by patient, doctor, or reference number..." 
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group-row">
+        <div class="filter-item">
+          <label class="filter-lbl">Status:</label>
+          <select 
+            [(ngModel)]="filterStatus" 
+            (ngModelChange)="onFilterChange()"
+            class="form-control"
+          >
+            <option value="all">All Statuses</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-lbl">Date:</label>
+          <input 
+            type="date" 
+            [(ngModel)]="filterDate" 
+            (ngModelChange)="onFilterChange()"
+            class="form-control"
+          />
+        </div>
+
+        <button class="btn btn-secondary btn-reset" (click)="clearFilters()">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-header">
+      <span class="count-text">
+        Showing <strong>{{ appointments.length }}</strong> appointment record{{ appointments.length === 1 ? '' : 's' }}
+      </span>
+    </div>
+
+    <!-- Data Display -->
+    @if (isLoading) {
+      <div class="state-container">
+        <div class="spinner"></div>
+        <p>Loading appointments from database...</p>
+      </div>
+    } @else if (appointments.length === 0) {
+      <div class="empty-card card text-center">
+        <span class="empty-icon">📅</span>
+        <h3>No Appointments Found</h3>
+        <p>There are no appointments matching your search query or selected date/status filter.</p>
+        <button class="btn btn-primary" (click)="clearFilters()">Clear Filters</button>
+      </div>
+    } @else {
+      <!-- Table View -->
+      <div class="table-responsive card p-0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ref #</th>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Specialty</th>
+              <th>Date & Time</th>
+              <th>Fee</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (app of appointments; track app.appointmentId) {
+              <tr>
+                <td>
+                  <strong class="ref-text">{{ app.referenceNumber }}</strong>
+                </td>
+                <td>
+                  <div class="patient-cell">
+                    <span class="pat-name">{{ app.patientName || 'Patient' }}</span>
+                    @if (app.patientPhone) {
+                      <span class="pat-sub">{{ app.patientPhone }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="doctor-cell">
+                    <span class="doc-name">{{ app.doctorName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="specialty-text">{{ app.specialtyName }}</span>
+                </td>
+                <td>
+                  <div class="datetime-cell">
+                    <span class="date-val">{{ app.appointmentDate | date:'mediumDate' }}</span>
+                    <span class="time-val">{{ app.appointmentTime }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="fee-val">${{ (app.consultationFee || 0) | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="'badge-' + app.status.toLowerCase()">
+                    {{ app.status }}
+                  </span>
+                </td>
+                <td>
+                  @if (app.status === 'Scheduled') {
+                    <button class="btn btn-danger btn-sm" (click)="openCancelModal(app)">
+                      Cancel
+                    </button>
+                  } @else {
+                    <span class="action-none">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Cancellation Confirmation Modal -->
+@if (appointmentToCancel) {
+  <div class="modal-backdrop" (click)="closeCancelModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Cancel Appointment</h3>
+        <button class="btn-close" (click)="closeCancelModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-warning-text">
+          Are you sure you want to cancel appointment <strong>{{ appointmentToCancel.referenceNumber }}</strong>?
+        </p>
+        <div class="cancel-summary-box">
+          <p><strong>Patient:</strong> {{ appointmentToCancel.patientName }}</p>
+          <p><strong>Doctor:</strong> {{ appointmentToCancel.doctorName }}</p>
+          <p><strong>Date & Time:</strong> {{ appointmentToCancel.appointmentDate | date:'mediumDate' }} at {{ appointmentToCancel.appointmentTime }}</p>
+        </div>
+        <p class="modal-note">
+          Cancelling will automatically release this time slot and make it available for other patients in Oracle Database.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCancelModal()" [disabled]="isCancelling">
+          Keep Appointment
+        </button>
+        <button class="btn btn-danger" (click)="confirmCancellation()" [disabled]="isCancelling">
+          {{ isCancelling ? 'Cancelling in Database...' : 'Confirm Cancellation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
