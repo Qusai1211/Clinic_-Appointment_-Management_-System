@@ -1,29 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Clininc_Management_System.Core.Models;
-
-public partial class Appointment
+namespace Clininc_Management_System.Core.Models
 {
-    public decimal Appointmentid { get; set; }
-
-    public string? Referencenumber { get; set; }
-
-    public DateTime Appointmentdate { get; set; }
-
-    public string Appointmenttime { get; set; } = null!;
-
-    public string? Status { get; set; }
-
-    public decimal? Doctorid { get; set; }
-
-    public decimal? Slotid { get; set; }
-
-    public decimal? Patientid { get; set; }
-
-    public virtual Doctor? Doctor { get; set; }
-
-    public virtual Patient? Patient { get; set; }
-
-    public virtual Appointmentslot? Slot { get; set; }
+    public class Appointment
+    {
+        public decimal AppointmentId { get; set; }
+        public string ReferenceNumber { get; set; } = string.Empty;
+        public DateTime AppointmentDate { get; set; }
+        public string AppointmentTime { get; set; } = string.Empty;
+        public string Status { get; set; } = "Scheduled";
+        public decimal? DoctorId { get; set; }
+        public string? DoctorName { get; set; }
+        public string? SpecialtyName { get; set; }
+        public decimal? SlotId { get; set; }
+        public decimal? PatientId { get; set; }
+        public string? PatientName { get; set; }
+        public string? PatientPhone { get; set; }
+        public string? PatientEmail { get; set; }
+        public decimal? ConsultationFee { get; set; }
+    }
 }
+

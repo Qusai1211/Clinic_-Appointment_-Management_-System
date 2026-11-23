@@ -1,6 +1,3 @@
-using Clinic_Management_System.API.Controllers;
-using Clinic_Management_System.infra.Service;
-using Clininc_Management_System.API.Controllers;
 using Clininc_Management_System.Core.common;
 using Clininc_Management_System.Core.Repository;
 using Clininc_Management_System.Core.Service;
@@ -8,60 +5,131 @@ using Clininc_Management_System.infra.Common;
 using Clininc_Management_System.infra.Repository;
 using Clininc_Management_System.infra.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IDbContext, PasswordSecurity>();
-builder.Services.AddScoped<IAdminRepository, AdminRepository>();
-builder.Services.AddScoped<IAdminService,AdminService>();
-builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
-builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
-builder.Services.AddScoped<IDoctorService, DoctorService>();
-builder.Services.AddScoped<IPatientRepository, PatientRepository>();
-builder.Services.AddScoped<IPatientService, PatientService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-builder.Services.AddAuthentication(optins =>
-{
-    optins.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    optins.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-
-}).AddJwtBearer(optins =>
-{
-    optins.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+// 1. Controller services
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MyTrainingJWTSecurityKey2026Secure!"))
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
+// 2. Swagger / OpenAPI Configuration
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Clinic Appointment Management System API",
+        Version = "v1",
+        Description = "ASP.NET Core Web API integrated with Oracle Database"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// 3. Database Context
+builder.Services.AddScoped<IDbContext, DbContext>();
+
+// 4. Repositories
+builder.Services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
+builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+
+// 5. Services
+builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// 6. Authentication & JWT
+var jwtSecret = builder.Configuration["JwtSettings:Secret"] ?? "TemporaryFallbackKeyForDesignTimeBuildOnly_abcdefghijklmnopqrstuvwxyz!";
+var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "ClinicAPI";
+var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "ClinicClient";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ClockSkew = TimeSpan.Zero
     };
+});
+
+builder.Services.AddAuthorization();
+
+// 7. CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || true) // enable Swagger for demonstration and API testing
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Clinic API v1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
+app.UseCors("AllowAll");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

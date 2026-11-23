@@ -1,46 +1,68 @@
-﻿using Clininc_Management_System.Core.common;
-using Microsoft.EntityFrameworkCore.Internal;
+using Clininc_Management_System.Core.common;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Clininc_Management_System.infra.Common
 {
-    public class PasswordSecurity:IDbContext
+    public class DbContext : IDbContext
     {
-        private DbConnection? connection;
-        private readonly IConfiguration configuration;
-        public PasswordSecurity(IConfiguration configuration1)
+        private DbConnection? _connection;
+        private readonly IConfiguration _configuration;
+
+        public DbContext(IConfiguration configuration)
         {
-            configuration = configuration1;
+            _configuration = configuration;
         }
-        public DbConnection connection1
+
+        private DbConnection GetOpenConnection()
         {
-            get
+            if (_connection == null)
             {
-                if (connection == null) {
-                    connection = new OracleConnection(configuration["ConnectionStrings:DBConnectionString"]);
-                    connection.Open();
+                var connStr = _configuration.GetConnectionString("DBConnectionString")
+                    ?? _configuration["ConnectionStrings:DBConnectionString"];
 
-                        }else if(connection.State != ConnectionState.Open)
+                if (string.IsNullOrWhiteSpace(connStr) || connStr.Contains("YOUR_DB_PASSWORD") || connStr.Contains("YOUR_DB_USERNAME"))
                 {
-                    connection.Open();
-
+                    throw new InvalidOperationException("Connection string 'DBConnectionString' is not configured. Please provide a valid Oracle connection string in appsettings.json or environment variables.");
                 }
-                return connection;
+
+                _connection = new OracleConnection(connStr);
+                _connection.Open();
             }
+            else if (_connection.State != ConnectionState.Open)
+            {
+                _connection.Open();
+            }
+            return _connection;
         }
 
-        public static bool VerifyPassword(string password, string passwordhash, out bool needsRehash)
+        public DbConnection connection1 => GetOpenConnection();
+        public DbConnection Connection => GetOpenConnection();
+
+        public void Dispose()
         {
-            throw new NotImplementedException();
+            if (_connection != null)
+            {
+                try
+                {
+                    if (_connection.State == ConnectionState.Open)
+                    {
+                        _connection.Close();
+                    }
+                    _connection.Dispose();
+                }
+                catch
+                {
+                    // Ignore disposal errors
+                }
+                finally
+                {
+                    _connection = null;
+                }
+            }
+            GC.SuppressFinalize(this);
         }
     }
 }
- 

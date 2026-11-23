@@ -1,16 +1,35 @@
-# Visual Studio and .NET
+# Build results
+bin/
+obj/
+dist/
+out/
+
+# Visual Studio / Rider / VS Code
 .vs/
-**/bin/
-**/obj/
+.idea/
+.vscode/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 
-# Temporary inspection files
-temp_inspection/
-pdf_extracted.txt
+# Node & Angular
+node_modules/
+.angular/
+.npm/
 
-# Angular
-Frontend_Clinic/node_modules/
-Frontend_Clinic/.angular/
-Frontend_Clinic/dist/
+# Logs & temporary files
+*.log
+*.tmp
+*.bak
+MailSink/
+.system_generated/
 
+# Local configuration & credentials
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+
+# Local QA Artifacts
+screenshots/
+browser_evidence/
