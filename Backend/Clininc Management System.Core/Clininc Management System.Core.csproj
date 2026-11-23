@@ -11,4 +11,9 @@
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="9.23.26400" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Service\" />
+    <Folder Include="Repository\" />
+  </ItemGroup>
+
 </Project>

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Clininc_Management_System.Core.Models;
-
-public partial class Specialty
+namespace Clininc_Management_System.Core.Models
 {
-    public decimal Specialtyid { get; set; }
-
-    public string Specialtyname { get; set; } = null!;
-
-    public string? Description { get; set; }
-
-    public virtual ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
+    public class Specialty
+    {
+        public decimal SpecialtyId { get; set; }
+        public string SpecialtyName { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public int DoctorCount { get; set; }
+        public int AppointmentCount { get; set; }
+    }
 }
+

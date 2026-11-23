@@ -1,4 +1,4 @@
-﻿using Clininc_Management_System.Core.DTO;
+using Clininc_Management_System.Core.DTOs;
 using Clininc_Management_System.Core.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +7,7 @@ namespace Clinic_Management_System.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Route("api/patient")]
     public class PatientsController : ControllerBase
     {
         private readonly IPatientService _patientService;
@@ -23,8 +24,7 @@ namespace Clinic_Management_System.API.Controllers
             return Ok(patients);
         }
 
-        [HttpGet]
-        [Route("{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(decimal id)
         {
             var patient = await _patientService.GetPatientByIdAsync(id);
@@ -70,8 +70,7 @@ namespace Clinic_Management_System.API.Controllers
         }
 
         [Authorize]
-        [HttpPut]
-        [Route("update/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Update(decimal id, [FromBody] PatientUpsertDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.FullName))
@@ -100,8 +99,7 @@ namespace Clinic_Management_System.API.Controllers
         }
 
         [Authorize]
-        [HttpDelete]
-        [Route("delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(decimal id)
         {
             try
@@ -112,7 +110,11 @@ namespace Clinic_Management_System.API.Controllers
                     return NotFound(new { Message = $"Patient with ID {id} not found." });
                 }
 
-                return Ok(new { Success = true, Message = "Patient record deleted successfully." });
+                return Ok(new { Success = true, Message = "Patient soft-deleted successfully." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Success = false, Message = ex.Message });
             }
             catch (Exception ex)
             {

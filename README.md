@@ -1,175 +1,230 @@
-# Clinic Appointment Management System ("Al-Amal Clinic")
-## University Final Project #9 – Full-Stack Enterprise Healthcare Platform
+# Clinic Appointment Management System
+## Master Unified Final Submission
 
-[![.NET 8.0](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![Angular 21](https://img.shields.io/badge/Angular-21-DD0031?logo=angular)](https://angular.dev/)
-[![Oracle Database 19c](https://img.shields.io/badge/Oracle-19c%20EE-F80000?logo=oracle)](https://www.oracle.com/database/)
-[![Dapper](https://img.shields.io/badge/ORM-Dapper-blue)](https://github.com/DapperLib/Dapper)
-[![JWT Auth](https://img.shields.io/badge/Auth-JWT%20Bearer-black?logo=jsonwebtokens)](https://jwt.io/)
-[![Playwright](https://img.shields.io/badge/QA-Playwright%20E2E-2EAD33?logo=playwright)](https://playwright.dev/)
-
-An enterprise-grade clinic management and appointment booking platform developed for **University Final Project #9**. The system integrates an **Oracle Database 19c Enterprise Edition** backend, a **3-tier ASP.NET Core 8.0 Web API** using Dapper, and a modern **Angular 21 Single Page Application (SPA)** with responsive styling and reactive form validation.
+A comprehensive, enterprise-grade Clinic Appointment Management System featuring an **Angular 21** single-page frontend, an **ASP.NET Core 8 Web API** 3-tier backend, and **Oracle Database 19c** with native PL/SQL stored procedure packages.
 
 ---
 
-## 🏛️ System Architecture
+## 1. Project Overview
+
+The Clinic Appointment Management System provides an end-to-end healthcare workflow connecting patients, clinical staff, and administrators:
+- **Patient Portal**: Search and filter doctors by medical specialty, view doctor qualifications, working hours, and book available appointment slots in real-time. Immediate reference number generation, appointment confirmation lookup, and appointment self-cancellation.
+- **Admin Management Portal**: Role-based access control (RBAC), JWT authentication with NIST PBKDF2 password hashing, real-time KPI statistics dashboard, dynamic specialty appointment breakdown charts, and full CRUD management for doctors, specialties, appointment schedules, patients, and administrators.
+- **Email Notification System**: Automated appointment confirmations, cancellation notices, and administrator alerts with safe local sink file logging by default (and optional SMTP relay).
+- **Enterprise Database Layer**: 8 relational tables, performance indexes, analytical views, and 8 Oracle PL/SQL packages encapsulating business operations and concurrency control.
+
+---
+
+## 2. Technology Stack
+
+| Layer | Technology | Version |
+| :--- | :--- | :--- |
+| **Frontend** | Angular Single Page Application (SPA), TypeScript, LESS, RxJS | Angular 21, TypeScript 5.9 |
+| **Backend API** | ASP.NET Core Web API, C#, .NET 8, Swagger/OpenAPI | .NET 8.0 (SDK 10.0+ compatible) |
+| **Data Access** | Dapper Micro-ORM, Dapper.Oracle, Oracle.ManagedDataAccess.Core | Dapper 2.1+, ODP.NET Core 23c |
+| **Database** | Oracle Database Enterprise / Standard Edition / XE | Oracle Database 19c (19.3+) |
+| **Authentication** | JWT Bearer Tokens, NIST PBKDF2 Hashing (100k iter, 128-bit salt) | HMAC-SHA256, BCrypt/Legacy SHA-256 fallback |
+
+---
+
+## 3. Required IDEs & Development Tools
+
+- **Visual Studio 2022** (v17.8+ with *.NET desktop development* and *ASP.NET and web development* workloads)
+- **Visual Studio Code** (with Angular Language Service and C# Dev Kit extensions)
+- **Oracle SQL Developer** (v21+ or v23+) or **SQL*Plus** command-line utility
+- **Node.js** (v20.x, v22.x, or v24.x LTS) & **npm** (v10+ or v11+)
+- **.NET 8 SDK** (v8.0.x or higher)
+
+---
+
+## 4. Repository Structure
+
+```text
+Final-Submission/
+├── Database/
+│   ├── 00_RUN_ALL.sql       # Master deployment script (executes all scripts in order)
+│   ├── 01_SCHEMA.sql        # Tables, sequences, indexes, and relational constraints
+│   ├── 02_VIEWS.sql         # Real-time dashboard and analytical views
+│   ├── 03_PACKAGES.sql      # PL/SQL package specifications and package bodies
+│   └── 04_SEED_DATA.sql     # Dependency-ordered seed data (Roles, Admins, Doctors, etc.)
+├── Backend/
+│   ├── Clinic Management System.sln
+│   ├── Clinic Management System.API/
+│   │   ├── Controllers/     # Admin, Auth, Doctors, Appointments, Patients, Specialties, Dashboard
+│   │   ├── Program.cs       # Service configuration, Swagger, JWT Bearer, CORS
+│   │   ├── appsettings.json # Oracle connection string, JWT, Email settings
+│   │   └── MailSink/        # Local sink storage for outbound notification emails
+│   ├── Clininc Management System.Core/
+│   │   ├── Models/          # Admin, Doctor, Patient, Appointment, Specialty, Role
+│   │   ├── DTOs/            # Request/Response Data Transfer Objects
+│   │   ├── Repository/      # Repository interfaces (IRepositories.cs)
+│   │   └── Service/         # Service interfaces (IServices.cs, IEmailService.cs)
+│   └── Clininc Management System.infra/
+│       ├── Common/          # DbContext (ODP.NET), PasswordSecurity (PBKDF2)
+│       ├── Repository/      # Dapper & Stored Procedure implementations (Repositories.cs)
+│       └── Service/         # Business logic & EmailService implementation
+└── Frontend/
+    ├── src/
+    │   ├── app/
+    │   │   ├── components/  # Navbar, Footer
+    │   │   ├── guards/      # AuthGuard (JWT client-side route guard)
+    │   │   ├── models/      # TypeScript interfaces and models
+    │   │   ├── pages/       # Home, Doctors, Details, Book, My Appointments, Admin Portal
+    │   │   └── services/    # ApiService, AuthService, NotificationService
+    │   ├── index.html
+    │   └── styles.less
+    ├── angular.json
+    ├── package.json
+    └── tsconfig.json
+```
+
+---
+
+## 5. Database Installation & Setup
+
+### Step 1: Verify Oracle Service and Listener
+Ensure your Oracle Database 19c service and listener are running:
+```powershell
+Get-Service OracleService* | Select-Object Name, Status
+lsnrctl status
+```
+
+### Step 2: Create Application User / Schema (as SYSDBA)
+Connect to your Pluggable Database (e.g. `finalpdb` or `orclpdb`):
+```sql
+ALTER SESSION SET CONTAINER = finalpdb;
+
+CREATE USER my_user IDENTIFIED BY "<YOUR_STRONG_PASSWORD>"
+    DEFAULT TABLESPACE USERS
+    QUOTA UNLIMITED ON USERS;
+
+GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE PROCEDURE, CREATE SEQUENCE, CREATE TABLE TO my_user;
+```
+
+### Step 3: Execute Master Deployment Script
+Navigate to the `Database` directory and run:
+```powershell
+cd Database
+sqlplus my_user/<YOUR_STRONG_PASSWORD>@localhost:1521/finalpdb @00_RUN_ALL.sql
+```
+This script automatically executes in strict dependency order:
+1. `01_SCHEMA.sql` — Drops existing objects safely, creates tables, sequences, and indexes.
+2. `02_VIEWS.sql` — Creates `Vw_AdminDashboardStats` and `Vw_AppointmentsBySpecialty`.
+3. `03_PACKAGES.sql` — Compiles all 8 PL/SQL packages and bodies without errors.
+4. `04_SEED_DATA.sql` — Seeds realistic clinic records and synchronizes identity sequences with `START WITH LIMIT VALUE`.
+
+---
+
+## 6. Backend Configuration & Execution
+
+### Step 1: Configure Connection String & Settings
+Review `Backend/Clinic Management System.API/appsettings.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DBConnectionString": "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=YOUR_PDB_NAME)));User Id=YOUR_DB_USERNAME;Password=YOUR_DB_PASSWORD;"
+  },
+  "JwtSettings": {
+    "Secret": "YOUR_SECURE_JWT_SECRET_KEY_MINIMUM_32_CHARACTERS_LONG!",
+    "Issuer": "ClinicAPI",
+    "Audience": "ClinicClient",
+    "DurationInDays": 7
+  },
+  "EmailSettings": {
+    "SafeDeliveryMode": "LocalSink",
+    "LocalSinkPath": "MailSink",
+    "SenderEmail": "no-reply@clinic.com",
+    "SenderName": "Clinic Appointment Management System"
+  }
+}
+```
+
+### Step 2: Restore & Build Solution
+Open a terminal in `Final-Submission/Backend`:
+```powershell
+dotnet restore "Clinic Management System.sln"
+dotnet build "Clinic Management System.sln"
+```
+
+### Step 3: Run the API Server
+```powershell
+dotnet run --project "Clinic Management System.API\Clinic Management System.API.csproj" --launch-profile "http"
+```
+The API server will launch and listen on:
+- **Base URL**: `http://localhost:5069`
+- **Swagger Documentation**: `http://localhost:5069/swagger`
+
+---
+
+## 7. Frontend Installation & Execution
+
+### Step 1: Install Node Dependencies
+Open a terminal in `Final-Submission/Frontend`:
+```powershell
+cd A:\Rama-Project\Final-Submission\Frontend
+npm install
+```
+*(Or use `npm ci` if reproducible lockfile installation is preferred).*
+
+### Step 2: Build the Application
+```powershell
+npm run build
+```
+
+### Step 3: Start the Angular Development Server
+```powershell
+npm start
+```
+The Angular Single Page Application will be served at:
+- **Local Application URL**: `http://localhost:4200`
+
+---
+
+## 8. Initial Administrator Provisioning
+
+The database is pre-seeded with a default administrator account:
+- **Username**: `admin`
+- **Password**: `admin123`
+- **Role**: `Admin`
+- **Email**: `admin@clinic.com`
+
+*Security Note: The password is encrypted using NIST PBKDF2 (HMAC-SHA256, 100,000 iterations, 128-bit random salt). A transparent migration path is included that seamlessly verifies and upgrades any legacy plain or SHA-256 passwords upon first login.*
+
+To log in:
+1. Open `http://localhost:4200/admin/login` in your web browser.
+2. Enter the credentials above.
+3. Upon authentication, you will be redirected to the **Admin Dashboard** (`http://localhost:4200/admin/dashboard`).
+
+---
+
+## 9. System Integration & Verified Workflows
+
+The three layers operate as one integrated system:
 
 ```mermaid
-flowchart TD
-    subgraph Client ["Frontend Tier (Angular 21 SPA)"]
-        UI_Home["Home & Specialty Search"]
-        UI_Docs["Doctor Directory & Profile"]
-        UI_Book["Appointment Booking & Slot Picker"]
-        UI_Conf["Confirmation with Reference Code"]
-        UI_Admin["Admin Dashboard & Management Portal"]
-        Guard["AuthGuard (JWT Bearer)"]
-    end
-
-    subgraph API ["Application Tier (ASP.NET Core 8 Web API)"]
-        Ctrl["REST API Controllers"]
-        Auth["JWT Auth & PBKDF2 PasswordSecurity"]
-        Dapper["Dapper Micro-ORM & DynamicParameters"]
-    end
-
-    subgraph DB ["Database Tier (Oracle 19c Enterprise)"]
-        Pkg["PKG_CLINIC_OPERATIONS (PL/SQL Stored Procedures)"]
-        Lock["Row-Level Lock (FOR UPDATE Concurrency Protection)"]
-        Views["Vw_AdminDashboardStats & Vw_AppointmentsBySpecialty"]
-        Tables["7 Relational Tables & Integrity Constraints"]
-    end
-
-    UI_Home --> Ctrl
-    UI_Docs --> Ctrl
-    UI_Book --> Ctrl
-    UI_Admin --> Ctrl
-    Guard -.->|Protects| UI_Admin
-
-    Ctrl --> Auth
-    Ctrl --> Dapper
-    Dapper --> Pkg
-    Dapper --> Views
-    Pkg --> Lock
-    Lock --> Tables
+flowchart LR
+    A["Angular Frontend\n(:4200)"] -->|"REST / JSON + JWT"| B["ASP.NET Core 8 Web API\n(:5069)"]
+    B -->|"Dapper / ODP.NET"| C["PL/SQL Packages\nPKG_CLINIC_OPERATIONS\nPKG_ADMINS_MNG"]
+    C -->|"Tables / Views"| D[("Oracle Database 19c\nfinalpdb (:1521)")]
+    B -->|"Safe Sink / SMTP"| E["Notification Engine\n(MailSink / Email)"]
 ```
 
----
-
-## 🚀 Key Functional Capabilities
-
-### Public Patient Portal
-- **Home Page**: Interactive medical specialties, featured doctor profiles, working hours, and search.
-- **Doctor Directory**: Search by doctor name, instant specialty filter pills, and sorting by fee/name.
-- **Doctor Details & Schedules**: Qualifications, consultation fees, weekly working hours, and real-time available time slots.
-- **Patient Registration**: Client and server-side validation; automatic duplicate phone verification.
-- **Appointment Booking**: Select doctor, appointment date, and available slot; atomic persistence in Oracle.
-- **Double-Booking Concurrency Protection**: Pessimistic `SELECT ... FOR UPDATE` row locks in Oracle PL/SQL serialize simultaneous requests, returning `HTTP 409 Conflict` to subsequent attempts.
-- **Instant Booking Confirmation**: Generates a unique reference code (`APT-...`) and displays full booking details.
-- **Appointments Directory**: View scheduled appointments, filter by date and status, and cancel eligible bookings (automatically reopening the slot in Oracle).
-
-### Administrative Management Portal
-- **Secure Admin Authentication**: Protected with **NIST-compliant PBKDF2** password hashing (100,000 iterations of HMAC-SHA256, random 128-bit salt), transparent auto-migration of legacy hashes, and JWT Bearer token generation.
-- **Live KPI Dashboard**: Real-time counters for Total Doctors, Total Patients, Total Appointments, Scheduled, Completed, and Cancelled appointments querying `Vw_AdminDashboardStats`.
-- **Specialty Distribution Analytics**: Visual distribution chart of appointments by medical specialty querying `Vw_AppointmentsBySpecialty`.
-- **Doctor Management**: Full CRUD operations for doctor profiles, consultation fees, weekly working hour editing, and appointment slot generation.
-- **Specialty Catalog Management**: Create, edit, and delete medical departments.
-- **Patient Registry**: Query, search, view detailed profiles, edit patient contact info, and manage patient records.
-- **Appointment Lifecycle**: Manage and update appointment statuses (`Scheduled` ➔ `Completed` / `Cancelled`) with automatic slot status synchronization.
+### Tested & Verified Workflows:
+1. **Browse Doctors & Filter**: Patients can filter doctors by specialty, search by keyword, and inspect consultation fees and ratings.
+2. **Book Appointment**: Select an active doctor, choose a date, pick from live available slots, enter patient information, and receive a permanent booking reference (`REF-YYYYMMDD-XXXX`).
+3. **Double Booking Prevention**: The Oracle package acquires row-level locks (`FOR UPDATE`) on the target slot, preventing race conditions and double bookings.
+4. **Appointment Management & Cancellation**: Patients or admins can look up an appointment by reference number and cancel it. The slot availability is immediately restored to available status (`IsAvailable = 1`).
+5. **Admin Operations**: Administrators can view real-time KPI metrics, visualize specialty appointment distribution, manage clinic staff, and create new administrators.
+6. **Automated Email Notifications**: Booking confirmation and cancellation notifications are dispatched and safely archived in `Backend/Clinic Management System.API/MailSink/`.
 
 ---
 
-## 📦 University Deliverables Directory
+## 10. Troubleshooting Guide
 
-| # | University Deliverable | Repository Path | Description |
-| :- | :--- | :--- | :--- |
-| **1** | **Oracle Database Scripts** | [`database_project/ClinicAppointmentManagementSystem.sql`](database_project/ClinicAppointmentManagementSystem.sql) | DDL schema, foreign key cascades, constraints, views, `PKG_CLINIC_OPERATIONS` package, and rich seed data. |
-| **2** | **Entity-Relationship Diagram** | [`database_project/erdplus.png`](database_project/erdplus.png) | Complete ERD showing all 7 tables, attributes, primary keys, and cardinalities. |
-| **3** | **ASP.NET Core Web API** | [`Clinic Management System/`](Clinic%20Management%20System/) | Clean 3-tier architecture (`API`, `Core`, `infra`) with Dapper, JWT, and Swagger. |
-| **4** | **Angular Frontend App** | [`Frontend_Clinic/`](Frontend_Clinic/) | Angular 21 Single Page Application with all 14 clinical and administrative views. |
-| **5** | **Screenshots Suite** | [`screenshots/`](screenshots/) | 17 verified high-resolution PNG captures covering desktop workflows, admin portal, and mobile layout. |
-| **6** | **PowerPoint Presentation** | [`presentation/Clinic_Appointment_Management_System_Presentation.pptx`](presentation/Clinic_Appointment_Management_System_Presentation.pptx) | 11-slide widescreen presentation deck covering architecture, schema, concurrency, and QA. |
-
----
-
-## 🛠️ Quick Start & Setup Guide
-
-### Prerequisites
-1. **.NET 8.0 SDK** ([Download](https://dotnet.microsoft.com/download/dotnet/8.0))
-2. **Node.js (v18+ or v20+) & npm** ([Download](https://nodejs.org/))
-3. **Oracle Database 19c Enterprise Edition / 21c / Express (XE)** running locally on port `1521` with service `ORCLPDB` (or custom SID).
-
----
-
-### Step 1: Database Setup (Oracle 19c)
-Open SQL*Plus as `SYSDBA`:
-```sql
-sqlplus sys/your_sys_password@localhost:1521/ORCLPDB as sysdba
-```
-Execute the following to create the dedicated schema:
-```sql
-CREATE USER CLINIC_USER IDENTIFIED BY clinic123 DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
-GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE PROCEDURE, CREATE SEQUENCE TO CLINIC_USER;
-EXIT;
-```
-Run the automated schema and seed data script:
-```bash
-sqlplus CLINIC_USER/clinic123@localhost:1521/ORCLPDB @database_project/ClinicAppointmentManagementSystem.sql
-```
-
----
-
-### Step 2: Backend Setup (ASP.NET Core Web API)
-Navigate to the API directory:
-```bash
-cd "Clinic Management System/Clinic Management System.API"
-dotnet restore
-dotnet run --urls "http://localhost:5069"
-```
-- API Base URL: `http://localhost:5069/api`
-- Interactive Swagger / OpenAPI: `http://localhost:5069/swagger`
-
-*Configuration note: Database connection and JWT settings are externalized in `appsettings.json` and `appsettings.Development.json`. For production, override via environment variables `ConnectionStrings__DBConnectionString` and `JwtSettings__Secret`.*
-
----
-
-### Step 3: Frontend Setup (Angular 21)
-Open a new terminal and navigate to the frontend directory:
-```bash
-cd "Frontend_Clinic"
-npm install
-npm start -- --port 4200
-```
-- Web Application URL: `http://localhost:4200`
-- Default Administrator Credentials:
-  - **Username**: `admin`
-  - **Password**: `admin123`
-
----
-
-## 🔒 Security & Data Integrity
-
-1. **NIST PBKDF2 Password Hashing**:
-   - `PasswordSecurity.cs` uses `Rfc2898DeriveBytes.Pbkdf2` with HMAC-SHA256, 100,000 iterations, and a 128-bit cryptographically secure random salt.
-   - Includes transparent auto-migration: existing legacy admin accounts are automatically upgraded upon successful authentication.
-2. **JWT Authorization**:
-   - Claims-based JWT Bearer tokens issued upon login with strict expiration and signature validation.
-   - Protected routes guarded on the frontend via `AuthGuard` and enforced on the backend via `[Authorize]`.
-3. **Double-Booking Prevention**:
-   - In `PKG_CLINIC_OPERATIONS.BOOK_APPOINTMENT`:
-     ```sql
-     SELECT IsAvailable INTO v_IsAvailable FROM AppointmentSlots WHERE SlotId = p_SlotId FOR UPDATE;
-     IF v_IsAvailable = 0 THEN
-         RAISE_APPLICATION_ERROR(-20002, 'Selected appointment slot is no longer available.');
-     END IF;
-     ```
-   - Race conditions are eliminated at the database engine level; competing parallel requests receive `HTTP 409 Conflict`.
-
----
-
-## 🧪 Quality Assurance & Verification
-
-- **ASP.NET Core Build**: Clean compilation in Release mode (`0 Error(s), 0 Warning(s)`).
-- **Angular Production Build**: Production bundle optimized (`0 Error(s), 0 Warning(s)`).
-- **Automated Security & Admin QA** (`verify_security_and_management.py`):
-  - 100% pass on authentication, PBKDF2 verification, token issuance, 401 unauthorized rejection on protected routes, and patient/schedule management.
-- **Playwright Browser E2E Suite** (`run_qa_and_screenshots.py`):
-  - 14 automated visual and functional scenarios executed in headless Chrome with zero console errors.
+| Issue | Root Cause | Solution |
+| :--- | :--- | :--- |
+| **ORA-12541 / ORA-12514: TNS no listener** | Oracle Listener is not running or PDB is not mounted | Run `lsnrctl start` in cmd. In `sqlplus / as sysdba`, execute `ALTER PLUGGABLE DATABASE finalpdb OPEN;`. |
+| **ORA-20008 / DUP_VAL_ON_INDEX on ID** | Identity column sequence out of sync after manual ID inserts | In SQL*Plus, run: `ALTER TABLE <TABLE_NAME> MODIFY (<ID_COL> GENERATED BY DEFAULT AS IDENTITY (START WITH LIMIT VALUE));` |
+| **CORS Error in Browser Console** | API CORS policy missing or API not running | Verify backend is running on `http://localhost:5069`. `Program.cs` includes `UseCors("AllowAll")`. |
+| **Port 5069 or 4200 already in use** | A previous instance is still running in background | Check active ports with `Get-NetTCPConnection -LocalPort 5069, 4200` and stop the conflicting process. |
+| **Angular LESS compilation error** | Missing devDependency `less` | Run `npm install less --save-dev` in `Final-Submission/Frontend`. |

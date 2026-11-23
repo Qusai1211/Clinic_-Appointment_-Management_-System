@@ -1,4 +1,4 @@
-﻿using Clininc_Management_System.Core.DTO;
+using Clininc_Management_System.Core.DTOs;
 using Clininc_Management_System.Core.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +17,7 @@ namespace Clinic_Management_System.API.Controllers
             _authService = authService;
         }
 
-        [HttpPost]
-        [Route("login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authService.LoginAsync(request);
@@ -30,8 +29,7 @@ namespace Clinic_Management_System.API.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        [Route("me")]
+        [HttpGet("me")]
         public IActionResult GetCurrentUser()
         {
             var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -48,3 +46,4 @@ namespace Clinic_Management_System.API.Controllers
         }
     }
 }
+
